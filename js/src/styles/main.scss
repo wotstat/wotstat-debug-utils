@@ -1,0 +1,33 @@
+
+body {
+  margin: 0;
+  font-size: 14rem;
+  line-height: 1.2;
+  height: 100vh;
+  width: 100vw;
+}
+
+.wotstat-debug-utils-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .marker {
+    width: 10rem;
+    height: 10rem;
+    background-color: rgb(30, 187, 255);
+    border-radius: 50%;
+  }
+
+  .fps {
+    margin: 0;
+    padding: 0;
+    font-size: 14rem;
+    color: #ffffff;
+    text-shadow: 0px 0px 2rem #000000;
+  }
+}

@@ -1,0 +1,6 @@
+<root>
+  <id>wotstat.debug-utils</id>
+  <version>{{VERSION}}</version>
+  <name>wotstat.debug-utils</name>
+  <description>Debug utilities by WotStat</description>
+</root>

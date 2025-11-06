@@ -1,0 +1,12 @@
+[
+  {
+    "itemID": "WOTSTAT_DEBUG_UTILS_VIEW",
+    "type": "Layout",
+    "path": "coui://gui/gameface/mods/wotstat-debug-utils/index.html",
+    "parameters": {
+      "extension": "",
+      "entrance": "DebugUtils",
+      "impl": "gameface"
+    }
+  }
+]
