@@ -1,0 +1,41 @@
+
+
+.markers-drawer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  .marker {
+    .circle {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .text {
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: PFDINMax;
+      font-size: 18rem;
+      line-height: 1.1;
+      font-weight: 400;
+      color: white;
+      text-shadow: 0 0 10rem rgba(0, 0, 0, 1);
+      padding-left: 5rem;
+      display: flex;
+      flex-direction: column;
+
+      .line {
+        display: flex;
+        flex-direction: row;
+      }
+    }
+  }
+}

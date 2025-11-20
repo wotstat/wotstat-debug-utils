@@ -7,7 +7,6 @@ function virtualExternal(spec = 'virtual:model', target = '../libs/model.js') {
     enforce: 'pre',
     resolveId(source: string) {
       if (source === spec) {
-        // Keep the exact specifier in the bundle and mark it external
         return { id: target, external: true }
       }
       return null

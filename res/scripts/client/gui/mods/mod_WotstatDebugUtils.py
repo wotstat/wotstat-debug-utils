@@ -25,36 +25,15 @@ def fini():
   
 
 # from gui.mods.wotstatDebugUtils.DebugView import WotstatDebugWindow
-
-# from frameworks.wulf import WindowFlags, WindowLayer
-# from gui.impl.pub import ViewImpl, WindowImpl
 # from skeletons.gui.impl import IGuiLoader
-# from skeletons.gui.app_loader import IAppLoader
 # from helpers import dependency
 # from openwg_gameface import res_id_by_key
-
-# from GUI import WGMarkerPositionController
 # import Math
 
 # uiLoader = dependency.instance(IGuiLoader)
-
-
-# def loadWindow():
-#     uiLoader = dependency.instance(IGuiLoader)
-#     view = uiLoader.windowsManager.getViewByLayoutID(res_id_by_key('WOTSTAT_DEBUG_UTILS_VIEW'))
-#     if view:
-#         window = view.getWindow()
-#         window.destroy()
-#     window = WotstatDebugWindow()
-#     print(window)
-#     BigWorld.callback(0, lambda: window.load())
-
-# #loadWindow()
 # view = uiLoader.windowsManager.getViewByLayoutID(res_id_by_key('WOTSTAT_DEBUG_UTILS_VIEW'))
-# #print(view.getWindow().move(400, 200))
 
-# #print(view.getViewModel().getDemoPosition().setNdcLimitY(13))
-
-# markerCtrl = WGMarkerPositionController()
-# markerCtrl.clear()
-# markerCtrl.add(view.getViewModel().getDemoPosition().proxy, Math.Vector3(20,0,0))
+# for y in range(62):
+#     i = view.createMarker()
+#     view.setMarkerPosition(i, Math.Vector3(5,y/8.0,5))
+# #view.destroyMarker(0)

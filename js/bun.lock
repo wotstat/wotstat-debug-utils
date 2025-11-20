@@ -14,6 +14,7 @@
         "sass": "^1.93.3",
         "typescript": "~5.9.3",
         "vite": "npm:rolldown-vite@7.1.14",
+        "wot-gameface-types": "^1.0.3",
       },
     },
   },
@@ -376,6 +377,8 @@
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 
     "word-wrap": ["word-wrap@1.2.5", "", {}, "sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA=="],
+
+    "wot-gameface-types": ["wot-gameface-types@1.0.3", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-Ki3sIx5kU78d9T4BvwjinO0ysp5vjQklPxbbHBDtHPxqlDltuKPqMGaoP6Rpevljl+PPlNw0wOynLLB4sNgQcw=="],
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
 
