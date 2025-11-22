@@ -2,6 +2,7 @@
 /// <reference types="wot-gameface-types/types/gameface-libs.d.ts" />
 
 
+import { LinesDrawer } from './drawers/linesDrawer/LinesDrawer'
 import { MarkerDrawer } from './drawers/markersDrawer/MarkersDrawer'
 import { ReactiveModel } from './utils/ReactiveModel'
 
@@ -21,10 +22,37 @@ type Model = {
     }
     id: string
   }>
+  lines: Array<{
+    value: {
+      p1: {
+        posx: number
+        posy: number
+        isVisible: boolean
+      }
+      p2: {
+        posx: number
+        posy: number
+        isVisible: boolean
+      }
+      width: number
+      color: string
+    }
+    id: string
+  }>
 }
+
 
 const root = document.getElementById('root') as HTMLElement
 const markerDrawer = new MarkerDrawer(root)
+const linesDrawer = new LinesDrawer()
+
+const canvas = document.createElement('canvas')
+root.appendChild(canvas)
+const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+
+let screenWidth = 0
+let screenHeight = 0
+let screenScale = 1
 
 function updateLoop() {
   requestAnimationFrame(() => updateLoop())
@@ -33,16 +61,30 @@ function updateLoop() {
   if (!model) return
 
   markerDrawer.draw(model.markers.map(m => m.value))
+
+  ctx.clearRect(0, 0, screenWidth, screenHeight)
+  ctx.save()
+  ctx.scale(screenScale, screenScale)
+
+  linesDrawer.draw(model.lines.map(l => l.value), ctx)
+
+  ctx.restore()
 }
 
 
 function updateSize() {
   const { height, width } = viewEnv.getClientSizePx()
-  const targetWidth = width || 100
-  const targetHeight = height || 100
+  screenWidth = width || 100
+  screenHeight = height || 100
+  screenScale = viewEnv.getScale() || 1
 
-  viewEnv.resizeViewPx(targetWidth, targetHeight)
-  requestAnimationFrame(() => viewEnv.setHitAreaPaddingsRem(targetHeight, 0, 0, 0, 15))
+  viewEnv.resizeViewPx(screenWidth, screenHeight)
+  requestAnimationFrame(() => viewEnv.setHitAreaPaddingsRem(screenHeight, 0, 0, 0, 15))
+
+  canvas.width = screenWidth
+  canvas.height = screenHeight
+  canvas.style.width = `${screenWidth}px`
+  canvas.style.height = `${screenHeight}px`
 }
 
 engine.whenReady.then(() => {

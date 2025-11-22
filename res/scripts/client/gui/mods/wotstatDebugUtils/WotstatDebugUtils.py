@@ -81,6 +81,37 @@ class WotstatDebugUtils(object):
         view.setupMarker(view.createMarker(), Math.Vector3(0, y / 3.0, 5), text=form.format(y * 4 + 1, '(0, %.2f, 5)' % (y / 3.0)))
         view.setupMarker(view.createMarker(), Math.Vector3(5, y / 3.0, 0), text=form.format(y * 4 + 2, '(5, %.2f, 0)' % (y / 3.0)))
         view.setupMarker(view.createMarker(), Math.Vector3(5, y / 3.0, 5), text=form.format(y * 4 + 3, '(5, %.2f, 5)' % (y / 3.0)))
+        
+    elif event.key == Keys.KEY_9:
+      
+      for y in range(20): 
+        view.setupLine(view.createLine(), 
+          p1=Math.Vector3(0, y / 5.0, 0), 
+          p2=Math.Vector3(0, y / 5.0, 5), 
+          width=1,
+          color="#FF2A00"
+        )
+        
+        view.setupLine(view.createLine(), 
+          p1=Math.Vector3(0, y / 5.0, 5), 
+          p2=Math.Vector3(5, y / 5.0, 5), 
+          width=1,
+          color="#56F11D"
+        )
+        
+        view.setupLine(view.createLine(),
+          p1=Math.Vector3(5, y / 5.0, 5), 
+          p2=Math.Vector3(5, y / 5.0, 0), 
+          width=1,
+          color="#1569EF"
+        )
+        
+        view.setupLine(view.createLine(),
+          p1=Math.Vector3(5, y / 5.0, 0), 
+          p2=Math.Vector3(0, y / 5.0, 0), 
+          width=2,
+          color="#F9F90D"
+        )
     
   def showWindow(self):
     uiLoader = dependency.instance(IGuiLoader) # type: IGuiLoader
