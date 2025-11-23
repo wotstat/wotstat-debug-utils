@@ -2,7 +2,7 @@ import { Marker } from './Marker'
 import './style.scss'
 
 
-type MarkerData = {
+export type MarkerData = {
   posx: number
   posy: number
   scale: number

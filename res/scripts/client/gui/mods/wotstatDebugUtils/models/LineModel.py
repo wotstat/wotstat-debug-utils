@@ -3,8 +3,12 @@ from .WorldPositionModel import OffscreenWorldPositionModel
 
 from ..MarkersManager import IMarkerManageable
 
+class LineEnd:
+  NONE = 0
+  ARROW = 1
+
 class LineModel(ViewModel, IMarkerManageable):
-  def __init__(self, properties=4, commands=0):
+  def __init__(self, properties=6, commands=0):
     # type: (int, int) -> None
     super(LineModel, self).__init__(properties=properties, commands=commands)
   
@@ -15,6 +19,8 @@ class LineModel(ViewModel, IMarkerManageable):
     self._addViewModelProperty('p2', OffscreenWorldPositionModel())
     self._addRealProperty('width', 1.0)
     self._addStringProperty('color', "#00AAFF")
+    self._addNumberProperty('end1', LineEnd.NONE)
+    self._addNumberProperty('end2', LineEnd.NONE)
   
   @property
   def p1(self):
@@ -50,11 +56,27 @@ class LineModel(ViewModel, IMarkerManageable):
     # type: (str) -> None
     self._setString(3, value)
     
+  def getEnd1(self):
+    # type: () -> int
+    return self._getNumber(4)
+  
+  def setEnd1(self, value):
+    # type: (int) -> None
+    self._setNumber(4, value)
+  
+  def getEnd2(self):
+    # type: () -> int
+    return self._getNumber(5)
+  
+  def setEnd2(self, value):
+    # type: (int) -> None
+    self._setNumber(5, value)
+  
   def destroy(self, markerCtrl):
     self.p1.detach(markerCtrl)
     self.p2.detach(markerCtrl)
       
-  def setup(self, markerCtrl, p1=None, p2=None, width=None, color=None):
+  def setup(self, markerCtrl, p1=None, p2=None, width=None, color=None, end1=None, end2=None):
 
     if p1 is not None: self.p1.attach(markerCtrl, p1)
     if p2 is not None: self.p2.attach(markerCtrl, p2)
@@ -65,3 +87,9 @@ class LineModel(ViewModel, IMarkerManageable):
         
       if color is not None:
         tx.setColor(color)
+        
+      if end1 is not None:
+        tx.setEnd1(end1)
+        
+      if end2 is not None:
+        tx.setEnd2(end2)

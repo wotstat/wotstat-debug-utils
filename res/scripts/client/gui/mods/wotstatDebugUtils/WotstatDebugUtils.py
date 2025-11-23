@@ -1,3 +1,4 @@
+from math import e
 import Keys
 import Math
 import BigWorld
@@ -13,6 +14,8 @@ except ImportError: pass
 
 from .DebugView import WotstatDebugWindow, WOTSTAT_DEBUG_UTILS_VIEW, DebugViewModel, DebugView
 from .Logger import Logger, SimpleLoggerBackend
+
+from .models.LineModel import LineEnd
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
@@ -96,7 +99,9 @@ class WotstatDebugUtils(object):
           p1=Math.Vector3(0, y / 5.0, 5), 
           p2=Math.Vector3(5, y / 5.0, 5), 
           width=1,
-          color="#56F11D"
+          color="#56F11D",
+          end1=LineEnd.ARROW if y % 4 == 0 else LineEnd.NONE,
+          end2=LineEnd.ARROW if y % 4 == 1 else LineEnd.NONE
         )
         
         view.setupLine(view.createLine(),
@@ -110,7 +115,9 @@ class WotstatDebugUtils(object):
           p1=Math.Vector3(5, y / 5.0, 0), 
           p2=Math.Vector3(0, y / 5.0, 0), 
           width=2,
-          color="#F9F90D"
+          color="#F9F90D",
+          end1=LineEnd.ARROW if y % 4 == 0 else LineEnd.NONE,
+          end2=LineEnd.ARROW if y % 4 == 1 else LineEnd.NONE
         )
     
   def showWindow(self):

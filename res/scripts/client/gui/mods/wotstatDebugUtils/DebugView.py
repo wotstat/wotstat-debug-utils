@@ -53,8 +53,8 @@ class DebugView(ViewImpl):
   def destroyLine(self, lineID):
     return self.lineMarkersManager.destroy(lineID)
   
-  def setupLine(self, lineID, p1=None, p2=None, width=None, color=None):
-    self.lineMarkersManager.setup(lineID, p1, p2, width, color)
+  def setupLine(self, lineID, p1=None, p2=None, width=None, color=None, end1=None, end2=None):
+    self.lineMarkersManager.setup(lineID, p1, p2, width, color, end1, end2)
 
 
 def get_parent_window():

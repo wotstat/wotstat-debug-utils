@@ -2,8 +2,8 @@
 /// <reference types="wot-gameface-types/types/gameface-libs.d.ts" />
 
 
-import { LinesDrawer } from './drawers/linesDrawer/LinesDrawer'
-import { MarkerDrawer } from './drawers/markersDrawer/MarkersDrawer'
+import { LinesDrawer, type LineData } from './drawers/linesDrawer/LinesDrawer'
+import { MarkerDrawer, type MarkerData } from './drawers/markersDrawer/MarkersDrawer'
 import { ReactiveModel } from './utils/ReactiveModel'
 
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
@@ -11,32 +11,11 @@ console.warn('WotStat Debug Utils Mod - main.ts loaded')
 type Model = {
   foo: string
   markers: Array<{
-    value: {
-      posx: number
-      posy: number
-      scale: number
-      isVisible: boolean
-      size: number
-      color: string
-      text: string
-    }
+    value: MarkerData
     id: string
   }>
   lines: Array<{
-    value: {
-      p1: {
-        posx: number
-        posy: number
-        isVisible: boolean
-      }
-      p2: {
-        posx: number
-        posy: number
-        isVisible: boolean
-      }
-      width: number
-      color: string
-    }
+    value: LineData
     id: string
   }>
 }
