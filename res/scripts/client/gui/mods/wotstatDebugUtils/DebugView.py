@@ -28,6 +28,8 @@ class DebugView(ViewImpl):
     self.markersCtrl = MarkerPositionController() # type: MarkerPositionController
     self.pointMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getMarkersType(), self.viewModel.getMarkers())
     self.lineMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getLinesType(), self.viewModel.getLines())
+    self.polyLineMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getPolyLinesType(), self.viewModel.getPolyLines())
+    self.boxMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getBoxesType(), self.viewModel.getBoxes())
 
 
   @property
@@ -55,7 +57,30 @@ class DebugView(ViewImpl):
   
   def setupLine(self, lineID, p1=None, p2=None, width=None, color=None, end1=None, end2=None):
     self.lineMarkersManager.setup(lineID, p1, p2, width, color, end1, end2)
-
+    
+  def createPolyLine(self):
+    return self.polyLineMarkersManager.create()
+  
+  def destroyPolyLine(self, polyLineID):
+    return self.polyLineMarkersManager.destroy(polyLineID)
+  
+  def setupPolyLine(self, polyLineID, points=None, width=None, color=None, end1=None, end2=None, closed=None):
+    self.polyLineMarkersManager.setup(polyLineID, points, width, color, end1, end2, closed)
+    
+  def createBox(self):
+    return self.boxMarkersManager.create()
+  
+  def destroyBox(self, boxID):
+    return self.boxMarkersManager.destroy(boxID)
+  
+  def setupBox(self, boxID, width=None, color=None, 
+      center=None, w=None, h=None, d=None, rotationX=None, rotationY=None, rotationZ=None, rotationMatrix=None,
+      point0=None, point1=None, point2=None, point3=None):
+    self.boxMarkersManager.setup(
+      boxID, width, color, 
+      center, w, h, d, rotationX, rotationY, rotationZ, rotationMatrix,
+      point0, point1, point2, point3
+    )
 
 def get_parent_window():
   ui_loader = dependency.instance(IGuiLoader)

@@ -1,7 +1,7 @@
-from math import e
 import Keys
 import Math
 import BigWorld
+import math
 
 from gui import  InputHandler
 try: from GUI import WGMarkerPositionController as MarkerPositionController
@@ -119,6 +119,37 @@ class WotstatDebugUtils(object):
           end1=LineEnd.ARROW if y % 4 == 0 else LineEnd.NONE,
           end2=LineEnd.ARROW if y % 4 == 1 else LineEnd.NONE
         )
+    
+    elif event.key == Keys.KEY_0:
+      for y in range(10):
+        points = []
+        COUNT = 30
+        for r in range(COUNT):
+          angle = r * (2 * math.pi / COUNT)
+          x = 2.5 + 2.0 * math.cos(angle)
+          z = 2.5 + 2.0 * math.sin(angle)
+          points.append(Math.Vector3(x, y / 2.0, z))
+          
+        view.setupPolyLine(view.createPolyLine(),
+          points=points,
+          width=1,
+          color="rgb(%d, %d, %d)" % (25 * y, 255 - 25 * y, 100 + 15 * y),
+          closed=True
+        )
+        
+    elif event.key == Keys.KEY_MINUS:
+      view.setupBox(
+        view.createBox(),
+        width=1,
+        color="#FF00FF",
+        center=Math.Vector3(2.5, 1.0, 2.5),
+        w=4.0,
+        h=2.0,
+        d=6.0,
+        rotationY=45.0,
+        rotationX=0,
+        rotationZ=0
+      )
     
   def showWindow(self):
     uiLoader = dependency.instance(IGuiLoader) # type: IGuiLoader
