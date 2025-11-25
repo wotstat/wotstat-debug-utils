@@ -1,0 +1,17 @@
+
+.floating-panel {
+  position: absolute;
+
+  top: 50rem;
+  left: 50rem;
+  
+  // width: 200rem;
+  // height: 300rem;
+
+  border-radius: 10rem;
+  background-color: #181818;
+  border: 1rem solid #545454;
+  box-shadow: 0rem 4rem 16rem rgba(0, 0, 0, 0.6);
+  pointer-events: all;
+  cursor: pointer;
+}

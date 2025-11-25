@@ -146,7 +146,7 @@ class WotstatDebugUtils(object):
         w=4.0,
         h=2.0,
         d=6.0,
-        rotationY=45.0,
+        rotationY=0.0,
         rotationX=0,
         rotationZ=0
       )
