@@ -1,5 +1,8 @@
 import './styles.scss'
 
+const X_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_X_POSITION'
+const Y_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_Y_POSITION'
+
 export class FloatingPanel {
 
   public readonly panel = document.createElement('div')
@@ -18,6 +21,13 @@ export class FloatingPanel {
       this.updatePaddings(height, width)
     })
     observer.observe(this.panel)
+
+    const savedX = localStorage.getItem(X_POSITION_KEY)
+    const savedY = localStorage.getItem(Y_POSITION_KEY)
+    if (savedX && savedY) {
+      this.panel.style.left = savedX
+      this.panel.style.top = savedY
+    }
   }
 
   private onPointerUp = (e: MouseEvent) => {
@@ -29,6 +39,9 @@ export class FloatingPanel {
 
     const { height, width } = viewEnv.getClientSizePx()
     requestAnimationFrame(() => requestAnimationFrame(() => this.updatePaddings(height, width)))
+
+    localStorage.setItem(X_POSITION_KEY, this.panel.style.left)
+    localStorage.setItem(Y_POSITION_KEY, this.panel.style.top)
   }
 
   private onPointerDown = (e: MouseEvent) => {

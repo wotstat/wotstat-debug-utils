@@ -18,6 +18,7 @@ export class BasePanel implements IPanel {
     this.panelElement.appendChild(this.headerElement)
 
     const headerTitle = document.createElement('div')
+    headerTitle.classList.add('panel-header-title')
     this.headerElement.appendChild(headerTitle)
     headerTitle.textContent = name
 
