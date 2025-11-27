@@ -3,7 +3,7 @@ import Math
 import BigWorld
 import math
 
-from gui import  InputHandler
+from gui import InputHandler
 try: from GUI import WGMarkerPositionController as MarkerPositionController
 except ImportError: from GUI import MarkerPositionController
 from skeletons.gui.impl import IGuiLoader
@@ -54,7 +54,7 @@ class WotstatDebugUtils(object):
     view = uiLoader.windowsManager.getViewByLayoutID(res_id_by_key('WOTSTAT_DEBUG_UTILS_VIEW')) # type: DebugView
 
     
-    if event.key == Keys.KEY_V:
+    if event.key == Keys.KEY_B:
       self.showWindow()
       
     if not view: return

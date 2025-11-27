@@ -1,3 +1,4 @@
+import { useThrottle } from '../../utils/useThrottle'
 import { BasePanel } from './panelController/PanelController'
 
 type StatisticsLine = {
@@ -16,6 +17,11 @@ export class StatisticsPanel extends BasePanel {
   private readonly simpleLinesCount: StatisticsLine
   private readonly polyLinesCount: StatisticsLine
   private readonly boxesCount: StatisticsLine
+  private readonly totalTimeHeader: HTMLElement
+
+  private readonly throttleUpdate = useThrottle((totalTimeMs: number) => {
+    this.totalTimeHeader.textContent = `${totalTimeMs.toFixed(2)}ms`
+  }, 300)
 
   constructor() {
     super('Statistics')
@@ -29,6 +35,10 @@ export class StatisticsPanel extends BasePanel {
     this.simpleLinesCount = this.createLine('Simple lines count', '0')
     this.polyLinesCount = this.createLine('Poly lines count', '0')
     this.boxesCount = this.createLine('Boxes count', '0')
+
+    this.totalTimeHeader = document.createElement('p')
+    this.headerContentContainer.appendChild(this.totalTimeHeader)
+    this.totalTimeHeader.textContent = '0ms'
   }
 
 
@@ -42,6 +52,7 @@ export class StatisticsPanel extends BasePanel {
     polyLinesCount: number
     boxesCount: number
   }) {
+    this.throttleUpdate(stats.totalTimeMs)
     this.totalTime.valueContainer.textContent = `${stats.totalTimeMs.toFixed(2)} ms`
     this.renderMarkerTime.valueContainer.textContent = `${stats.renderMarkerTimeMs.toFixed(2)} ms`
     this.renderLinesTime.valueContainer.textContent = `${stats.renderLinesTimeMs.toFixed(2)} ms`

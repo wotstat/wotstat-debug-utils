@@ -11,4 +11,25 @@
   box-shadow: 0rem 4rem 16rem rgba(0, 0, 0, 0.6);
   pointer-events: all;
   cursor: pointer;
+
+  .floating-panel-hover-header {
+    position: absolute;
+    top: -19rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #f9f9f9;
+    font-size: 12rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(5rem);
+    text-shadow: 0 0 2rem rgba(0, 0, 0, 0.8), 0 0 8rem rgba(0, 0, 0, 0.8);
+  }
+
+  &:hover .floating-panel-hover-header {
+    opacity: 1;
+    transform: translateY(0);
+
+  }
 }

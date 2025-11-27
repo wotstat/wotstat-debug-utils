@@ -15,6 +15,11 @@ export class FloatingPanel {
     this.root.appendChild(this.panel)
     this.panel.addEventListener('mousedown', this.onPointerDown)
 
+    const panelHoverHeader = document.createElement('div')
+    panelHoverHeader.classList.add('floating-panel-hover-header')
+    this.panel.appendChild(panelHoverHeader)
+    panelHoverHeader.textContent = 'WotStat Debug Utils'
+
     const observer = new ResizeObserver((entries) => {
       if (entries.length === 0) return
       const { height, width } = viewEnv.getClientSizePx()

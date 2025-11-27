@@ -1,5 +1,6 @@
 import typing
 import Math
+from Event import SafeEvent
 from frameworks.wulf import WindowFlags, ViewSettings, ViewFlags
 from gui.impl.pub import ViewImpl, WindowImpl
 from skeletons.gui.impl import IGuiLoader
@@ -16,6 +17,8 @@ WOTSTAT_DEBUG_UTILS_VIEW = 'WOTSTAT_DEBUG_UTILS_VIEW'
 
 logger = Logger.instance()
 
+onDebugViewLoaded = SafeEvent()
+onDebugViewUnloaded = SafeEvent()
 
 class DebugView(ViewImpl):
   
@@ -36,8 +39,13 @@ class DebugView(ViewImpl):
   def viewModel(self):
     # type: () -> DebugViewModel
     return super(DebugView, self).getViewModel()
+  
+  def _onLoading(self, *args, **kwargs):
+    super(DebugView, self)._onLoading(*args, **kwargs)
+    onDebugViewLoaded(self)
 
   def _finalize(self):
+    onDebugViewUnloaded(self)
     super(DebugView, self)._finalize()
     
   def createMarker(self):

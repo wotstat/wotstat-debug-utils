@@ -6,6 +6,7 @@ import { LinesDrawer, type BoxData, type PolyLineData, type SimpleLineData } fro
 import { MarkerDrawer, type MarkerData } from './drawers/markersDrawer/MarkersDrawer'
 import { FloatingPanel } from './ui/floatingPanel/FloatingPanel'
 import { PanelController } from './ui/panels/panelController/PanelController'
+import { UserPanelsController } from './ui/panels/panelController/UserPanelsController'
 import { StatisticsPanel } from './ui/panels/Statistics'
 import { ReactiveModel } from './utils/ReactiveModel'
 import type { ModelValue } from './utils/types'
@@ -13,7 +14,6 @@ import type { ModelValue } from './utils/types'
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
 
 type Model = {
-  foo: string
   markers: Array<ModelValue<MarkerData>>
   lines: Array<ModelValue<SimpleLineData>>
   polyLines: Array<ModelValue<PolyLineData>>
@@ -28,6 +28,8 @@ const panel = new FloatingPanel(root)
 const panelController = new PanelController(panel.panel)
 const statisticsPanel = new StatisticsPanel()
 panelController.addPanel(statisticsPanel)
+
+const userPanelsController = new UserPanelsController(panelController)
 
 const canvas = document.createElement('canvas')
 root.appendChild(canvas)

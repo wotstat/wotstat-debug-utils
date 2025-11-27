@@ -1,0 +1,32 @@
+.user-panel-button-line-container {
+  .user-panel-button-line-text {
+    margin-right: 5rem;
+
+    &.hide {
+      display: none;
+    }
+  }
+
+  .user-panel-button-line-button {
+    border: none;
+    border-radius: 2rem;
+    background-color: #ffffff21;
+    color: rgb(209, 209, 209);
+    padding: 0rem 8rem;
+    font-weight: bold;
+    pointer-events: all;
+    transition: background-color 0.2s ease;
+    line-height: 1;
+    height: 14rem;
+    font-size: 10rem;
+    width: 80rem;
+
+    &:hover {
+      background-color: #ffffff3b;
+    }
+
+    &.user-panel-full-width-button {
+      flex: 1;
+    }
+  }
+}

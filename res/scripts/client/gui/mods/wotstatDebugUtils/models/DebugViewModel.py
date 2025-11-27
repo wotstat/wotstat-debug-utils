@@ -3,10 +3,11 @@ from .MarkerModel import MarkerModel
 from .LineModel import LineModel
 from .PolyLineModel import PolyLineModel
 from .BoxModel import BoxModel
+from .UiModel import UiModel
 
 class DebugViewModel(ViewModel):
   
-  def __init__(self, properties=4, commands=0):
+  def __init__(self, properties=5, commands=0):
     # type: (int, int) -> None
     super(DebugViewModel, self).__init__(properties=properties, commands=commands)
   
@@ -17,6 +18,7 @@ class DebugViewModel(ViewModel):
     self._addArrayProperty('lines', Array())
     self._addArrayProperty('polyLines', Array())
     self._addArrayProperty('boxes', Array())
+    self._addViewModelProperty('ui', UiModel())
 
   def getMarkers(self):
     # type: () -> Array
@@ -49,6 +51,14 @@ class DebugViewModel(ViewModel):
   def setBoxes(self, value):
     # type: (Array) -> None
     self._setArray(3, value)
+    
+  def getUi(self):
+    # type: () -> UiModel
+    return self._getViewModel(4)
+  
+  def setUi(self, value):
+    # type: (UiModel) -> None
+    self._setViewModel(4, value)
   
   @staticmethod
   def getMarkersType():

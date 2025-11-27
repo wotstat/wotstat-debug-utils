@@ -10,6 +10,7 @@ export class BasePanel implements IPanel {
   protected readonly panelElement: HTMLElement = document.createElement('div')
   protected readonly headerElement: HTMLElement = document.createElement('div')
   protected readonly contentElement: HTMLElement = document.createElement('div')
+  protected readonly headerContentContainer: HTMLElement = document.createElement('div')
 
   constructor(name: string) {
     this.panelElement.classList.add('panel')
@@ -21,6 +22,9 @@ export class BasePanel implements IPanel {
     headerTitle.classList.add('panel-header-title')
     this.headerElement.appendChild(headerTitle)
     headerTitle.textContent = name
+
+    this.headerElement.appendChild(this.headerContentContainer)
+    this.headerContentContainer.classList.add('panel-header-content-container')
 
     const collapseButton = document.createElement('div')
     collapseButton.classList.add('panel-collapse-button')
