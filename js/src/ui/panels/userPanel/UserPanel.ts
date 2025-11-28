@@ -2,7 +2,11 @@ import type { ModelValue } from '../../../utils/types'
 import { BasePanel } from '../panelController/PanelController'
 import { type BaseLine, type LineModel } from './lines'
 import { ButtonLine } from './lines/buttonLine/ButtonLine'
+import { CheckboxLine } from './lines/checkboxLine/CheckboxLine'
+import { SeparatorLine } from './lines/separatorLine/Separator'
 import { TextLine } from './lines/textLine/TextLine'
+import { ValueLine } from './lines/valueLine/ValueLine'
+
 
 
 export type PanelModel = {
@@ -10,9 +14,13 @@ export type PanelModel = {
   lines: Array<ModelValue<LineModel>>
 }
 
-const lineFactory = {
-  'text': (userPanel: UserPanel) => new TextLine(userPanel),
-  'button': (userPanel: UserPanel) => new ButtonLine(userPanel)
+type LineType = LineModel['type']
+const lineFactory: { [K in LineType]?: (userPanel: UserPanel) => BaseLine } = {
+  'text': userPanel => new TextLine(userPanel),
+  'button': userPanel => new ButtonLine(userPanel),
+  'separator': userPanel => new SeparatorLine(userPanel),
+  'value': userPanel => new ValueLine(userPanel),
+  'checkbox': userPanel => new CheckboxLine(userPanel),
 }
 
 export class UserPanel extends BasePanel {
@@ -34,7 +42,7 @@ export class UserPanel extends BasePanel {
           continue
         }
 
-        const line: BaseLine = lineFactory[type](this)
+        const line: BaseLine = lineFactory[type]!(this)
         this.lines.set(model.lines[i].id, line)
         line.update(lineModel)
 

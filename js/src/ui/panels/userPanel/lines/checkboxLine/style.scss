@@ -1,0 +1,41 @@
+.user-panel-checkbox-line-container {
+  .user-panel-checkbox-line-label {
+    
+  }
+
+  .user-panel-checkbox-line-checkbox {
+    border: none;
+    border-radius: 2rem;
+    background-color: #ffffff21;
+    pointer-events: all;
+    transition: background-color 0.2s ease;
+    height: 12rem;
+    width: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1rem solid #545454;
+
+    &:hover {
+      background-color: #ffffff3b;
+    }
+
+    svg {
+      height: 11rem;
+      width: 11rem;
+      pointer-events: none;
+      visibility: hidden;
+      
+      g {
+        fill: #d8d8d8;
+      }
+    }
+
+    &.checked {
+      svg {
+        visibility: visible;
+      }
+    }
+
+  }
+}

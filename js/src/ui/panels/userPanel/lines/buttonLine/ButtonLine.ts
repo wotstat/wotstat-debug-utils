@@ -3,14 +3,14 @@ import type { UserPanel } from '../../UserPanel'
 import './style.scss'
 
 export class ButtonLine extends BaseLine {
-  type = 'button'
+  type = 'button' as const
 
-  private readonly textElement: HTMLElement
+  private readonly labelElement: HTMLElement
   private readonly buttonElement: HTMLButtonElement
 
   private model: ButtonLineModel | null = null
-  private text: string = ''
-  private buttonLabel: string = ''
+  private label: string = ''
+  private buttonText: string = ''
 
   constructor(protected readonly userPanel: UserPanel) {
     super()
@@ -18,9 +18,9 @@ export class ButtonLine extends BaseLine {
     const container = this.userPanel.createLineContainer()
     container.classList.add('user-panel-button-line-container')
 
-    this.textElement = document.createElement('div')
-    this.textElement.classList.add('user-panel-button-line-text')
-    container.appendChild(this.textElement)
+    this.labelElement = document.createElement('div')
+    this.labelElement.classList.add('user-panel-button-line-text')
+    container.appendChild(this.labelElement)
 
     this.buttonElement = document.createElement('button')
     this.buttonElement.classList.add('user-panel-button-line-button')
@@ -36,28 +36,28 @@ export class ButtonLine extends BaseLine {
 
   private setButtonFullWidth(fullWidth: boolean) {
     if (fullWidth) {
-      this.textElement.classList.add('hide')
+      this.labelElement.classList.add('hide')
       this.buttonElement.classList.add('user-panel-full-width-button')
     } else {
-      this.textElement.classList.remove('hide')
+      this.labelElement.classList.remove('hide')
       this.buttonElement.classList.remove('user-panel-full-width-button')
     }
   }
 
   update(model: ButtonLineModel): void {
-    const newText = model.text
-    const newButtonLabel = model.buttonLabel
+    const newLabel = model.label
+    const newButtonText = model.buttonText
     this.model = model
 
-    if (this.text !== newText) {
-      this.text = newText
-      this.textElement.textContent = this.text
-      this.setButtonFullWidth(this.text === '')
+    if (this.label !== newLabel) {
+      this.label = newLabel
+      this.labelElement.textContent = this.label
+      this.setButtonFullWidth(this.label === '')
     }
 
-    if (this.buttonLabel !== newButtonLabel) {
-      this.buttonLabel = newButtonLabel
-      this.buttonElement.textContent = this.buttonLabel
+    if (this.buttonText !== newButtonText) {
+      this.buttonText = newButtonText
+      this.buttonElement.textContent = this.buttonText
     }
   }
 }

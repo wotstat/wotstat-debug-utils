@@ -3,7 +3,7 @@ import type { UserPanel } from '../../UserPanel'
 import './style.scss'
 
 export class TextLine extends BaseLine {
-  type = 'text'
+  type = 'text' as const
 
   private readonly textElement: HTMLElement
   private text: string = ''

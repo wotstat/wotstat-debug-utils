@@ -24,7 +24,7 @@
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     transform: translateY(5rem);
-    text-shadow: 0 0 2rem rgba(0, 0, 0, 0.8), 0 0 8rem rgba(0, 0, 0, 0.8);
+    text-shadow: 0 0 10rem rgba(0, 0, 0, 1), 0 0 4rem rgba(0, 0, 0, 1);
   }
 
   &:hover .floating-panel-hover-header {

@@ -6,9 +6,7 @@ function virtualExternal(spec = 'virtual:model', target = '../libs/model.js') {
     name: 'virtual-external-model',
     enforce: 'pre',
     resolveId(source: string) {
-      if (source === spec) {
-        return { id: target, external: true }
-      }
+      if (source === spec) return { id: target, external: true }
       return null
     },
   }

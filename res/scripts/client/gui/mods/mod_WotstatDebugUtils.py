@@ -37,3 +37,43 @@ def fini():
 #     i = view.createMarker()
 #     view.setMarkerPosition(i, Math.Vector3(5,y/8.0,5))
 # #view.destroyMarker(0)
+
+
+
+# from gui.debugUtils import ui
+
+#print(ui)
+
+
+#panel = ui.createPanel('test1')
+#textLine = panel.addTextLine('textLine')
+#print(line.setText('132436'))
+#print(panel1)
+
+#def onClick():
+#   print('onClick')
+#   
+#def onCheckBoxToggle(value):
+#   print('onCheckBoxToggle')
+#   print(value)
+#
+#textLine = panel.addTextLine('textLine')
+#btnLine = panel.addButtonLine('btnLine', 'label', onClick)
+#checkBox = panel.addCheckboxLine('checkBox defalt')
+#checkBoxVisibility = panel.addCheckboxLine('checkBox visibility', checkboxType='visibility')
+#valueLine = panel.addValueLine('valueLine', 'val123')
+#separatorLine = panel.addSeparatorLine()
+#inputLine = panel.addInputLine('inputLine', value='value', inputType='text')
+#inputLineNum = panel.addInputLine('inputLine num', value='134', inputType='numeric')
+
+
+#checkBox.onCheckBoxToggle += onCheckBoxToggle
+#checkBox.setIsChecked(False)
+#print(checkBox.getIsChecked())
+
+#checkBox.setIsChecked(True)
+
+#btn.setButtonLabel('btn label')
+#btn.setText('Test')
+
+#panel7.remove()
