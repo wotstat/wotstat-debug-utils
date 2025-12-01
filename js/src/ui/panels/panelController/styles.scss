@@ -42,14 +42,28 @@
       .panel-collapse-button {
         width: 14rem;
         height: 14rem;
-        background-color: #ffffff21;
+        background-color: #ffffff00;
         transition: background-color 0.2s ease;
-        border-radius: 2rem;
+        border-radius: 20rem;
         margin-left: 5rem;
 
-        &:hover {
-          background-color: #ffffff3b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+          width: 10rem;
+          height: 10rem;
+          fill: #d8d8d8;
+          transition: transform 0.2s ease, fill 0.2s ease;
         }
+
+        &:hover {
+          svg {
+            fill: #a4a4a4;
+          }
+        }
+
       }
     }
 
@@ -57,10 +71,6 @@
       font-size: 12rem;
       color: #d0d0d0;
       margin-top: 5rem;
-
-      &.collapsed {
-        display: none;
-      }
 
       .panel-line {
         display: flex;
@@ -76,6 +86,19 @@
         height: 1rem;
         background-color: #ffffff22;
         margin: 5rem 0;
+      }
+    }
+
+    &.collapsed {
+      .panel-header {
+        .panel-collapse-button {
+          svg {
+            transform: rotate(90deg);
+          }
+        }
+      }
+      .panel-content {
+        display: none;
       }
     }
   }

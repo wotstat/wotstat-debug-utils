@@ -11,19 +11,24 @@ export type ButtonLineModel = {
   onButtonClick: () => void
 }
 
-export type InputLineModel = {
-  type: 'input',
+export type TextInputLineModel = {
+  type: 'text-input',
   label: string,
   value: string,
-  inputType: 'numeric' | 'text',
   onInputChange: (args: { value: string }) => void
+}
+
+export type NumberInputLineModel = {
+  type: 'number-input',
+  label: string,
+  value: number,
+  onInputChange: (args: { value: number }) => void
 }
 
 export type CheckboxLineModel = {
   type: 'checkbox',
   label: string,
   isChecked: boolean,
-  checkboxType: 'default' | 'switch',
   onCheckboxToggle: (args: { value: boolean }) => void
 }
 
@@ -39,7 +44,8 @@ export type SeparatorLineModel = {
 
 export type LineModel = TextLineModel |
   ButtonLineModel |
-  InputLineModel |
+  TextInputLineModel |
+  NumberInputLineModel |
   CheckboxLineModel |
   ValueLineModel |
   SeparatorLineModel

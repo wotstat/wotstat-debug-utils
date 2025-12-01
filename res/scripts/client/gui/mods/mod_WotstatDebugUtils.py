@@ -40,40 +40,24 @@ def fini():
 
 
 
+
 # from gui.debugUtils import ui
 
-#print(ui)
-
-
-#panel = ui.createPanel('test1')
-#textLine = panel.addTextLine('textLine')
-#print(line.setText('132436'))
-#print(panel1)
-
+#panel = ui.createPanel('test3')
+#
 #def onClick():
 #   print('onClick')
 #   
 #def onCheckBoxToggle(value):
-#   print('onCheckBoxToggle')
-#   print(value)
+#   print('onCheckBoxToggle', value)
+#   
+#def onInput(value):
+#   print('onInput', value)
 #
 #textLine = panel.addTextLine('textLine')
 #btnLine = panel.addButtonLine('btnLine', 'label', onClick)
-#checkBox = panel.addCheckboxLine('checkBox defalt')
-#checkBoxVisibility = panel.addCheckboxLine('checkBox visibility', checkboxType='visibility')
+#checkBox = panel.addCheckboxLine('checkBox defalt', onToggleCallback=onCheckBoxToggle)
 #valueLine = panel.addValueLine('valueLine', 'val123')
 #separatorLine = panel.addSeparatorLine()
-#inputLine = panel.addInputLine('inputLine', value='value', inputType='text')
-#inputLineNum = panel.addInputLine('inputLine num', value='134', inputType='numeric')
-
-
-#checkBox.onCheckBoxToggle += onCheckBoxToggle
-#checkBox.setIsChecked(False)
-#print(checkBox.getIsChecked())
-
-#checkBox.setIsChecked(True)
-
-#btn.setButtonLabel('btn label')
-#btn.setText('Test')
-
-#panel7.remove()
+#inputLine = panel.addTextInputLine('inputLine', value='value', onChangeCallback=onInput)
+#inputNum = panel.addNumberInputLine('numberInput', value=1, onChangeCallback=onInput)

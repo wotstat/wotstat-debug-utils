@@ -6,6 +6,7 @@ const Y_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_Y_POSITION'
 export class FloatingPanel {
 
   public readonly panel = document.createElement('div')
+  private readonly debugClickArea = document.createElement('div')
 
   private dragDelta = { x: 0, y: 0 }
   private isDragging = false
@@ -33,6 +34,9 @@ export class FloatingPanel {
       this.panel.style.left = savedX
       this.panel.style.top = savedY
     }
+
+    document.body.appendChild(this.debugClickArea)
+    this.debugClickArea.classList.add('floating-panel-debug-click-area')
   }
 
   private onPointerUp = (e: MouseEvent) => {
@@ -90,6 +94,10 @@ export class FloatingPanel {
     const remRight = viewEnv.pxToRem(right)
 
     viewEnv.setHitAreaPaddingsRem(remTop, remRight, remBottom, remLeft, 15)
+    this.debugClickArea.style.width = `${rect.width}px`
+    this.debugClickArea.style.height = `${rect.height}px`
+    this.debugClickArea.style.top = `${top}px`
+    this.debugClickArea.style.left = `${left}px`
   }
 
   public onScreenResize(height: number, width: number) {

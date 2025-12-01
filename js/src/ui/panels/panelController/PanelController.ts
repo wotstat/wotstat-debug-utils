@@ -1,5 +1,5 @@
-
 import './styles.scss'
+import DropDown from './assets/dropdown.svg?raw'
 
 export interface IPanel {
   addToRoot(root: HTMLElement): void
@@ -29,10 +29,12 @@ export class BasePanel implements IPanel {
     const collapseButton = document.createElement('div')
     collapseButton.classList.add('panel-collapse-button')
     collapseButton.addEventListener('click', () => {
-      this.contentElement.classList.toggle('collapsed')
+      this.panelElement.classList.toggle('collapsed')
     })
     collapseButton.addEventListener('mousedown', e => e.stopPropagation())
     this.headerElement.appendChild(collapseButton)
+
+    collapseButton.innerHTML = DropDown
 
     this.contentElement.classList.add('panel-content')
     this.panelElement.appendChild(this.contentElement)

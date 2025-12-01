@@ -63,11 +63,7 @@ class ButtonLine(Line):
 
 class CheckboxLine(Line):
   
-  class CheckboxType:
-    DEFAULT = 'default'
-    VISIBILITY = 'visibility'
-  
-  def __init__(self, properties=4, commands=1):
+  def __init__(self, properties=3, commands=1):
     # type: (str, int, int) -> None
     super(CheckboxLine, self).__init__(type='checkbox', properties=properties, commands=commands)
     self.onToggle = SafeEvent()
@@ -77,7 +73,6 @@ class CheckboxLine(Line):
     super(CheckboxLine, self)._initialize()
     self._addStringProperty('label', '')
     self._addBoolProperty('isChecked', False)
-    self._addStringProperty('checkboxType', CheckboxLine.CheckboxType.DEFAULT)
     self._onCheckboxToggleCommand = self._addCommand('onCheckboxToggle')
     
     self._onCheckboxToggleCommand += self._onCheckboxToggle
@@ -108,14 +103,6 @@ class CheckboxLine(Line):
     # type: (bool) -> None
     self._setBool(2, value)
     
-  def getCheckboxType(self):
-    # type: () -> str
-    return self._getString(3)
-  
-  def setCheckboxType(self, value):
-    # type: (str) -> None
-    self._setString(3, value)
-
 class ValueLine(Line):
   def __init__(self, properties=2, commands=0):
     # type: (str, int, int) -> None
@@ -153,22 +140,18 @@ class SeparatorLine(Line):
     # type: () -> None
     super(SeparatorLine, self)._initialize()
     
-class InputLine(Line):
-  class InputType:
-    NUMERIC = 'numeric'
-    TEXT = 'text'
+class TextInputLine(Line):
     
   def __init__(self, properties=3, commands=1):
     # type: (str, int, int) -> None
-    super(InputLine, self).__init__(type='input', properties=properties, commands=commands)
+    super(TextInputLine, self).__init__(type='text-input', properties=properties, commands=commands)
     self.onChange = SafeEvent()
     
   def _initialize(self):
     # type: () -> None
-    super(InputLine, self)._initialize()
+    super(TextInputLine, self)._initialize()
     self._addStringProperty('label', '')
     self._addStringProperty('value', '')
-    self._addStringProperty('inputType', InputLine.InputType.TEXT)
     self._onInputChangeCommand = self._addCommand('onInputChange')
     
     self._onInputChangeCommand += self._onInputChange
@@ -198,14 +181,47 @@ class InputLine(Line):
   def setValue(self, value):
     # type: (str) -> None
     self._setString(2, value)
-    
-  def getInputType(self):
-    # type: () -> str
-    return self._getString(3)
   
-  def setInputType(self, value):
+class NumberInputLine(Line):
+  def __init__(self, properties=3, commands=1):
+    # type: (str, int, int) -> None
+    super(NumberInputLine, self).__init__(type='number-input', properties=properties, commands=commands)
+    self.onChange = SafeEvent()
+    
+  def _initialize(self):
+    # type: () -> None
+    super(NumberInputLine, self)._initialize()
+    self._addStringProperty('label', '')
+    self._addRealProperty('value', 0)
+    self._onInputChangeCommand = self._addCommand('onInputChange')
+    
+    self._onInputChangeCommand += self._onInputChange
+    
+  def _finalize(self):
+    self._onInputChangeCommand -= self._onInputChange
+    return super()._finalize()
+  
+  def _onInputChange(self, args={}):
+    # type: (dict) -> None
+    value = args.get('value', 0)
+    self.setValue(value)
+    self.onChange(value)
+    
+  def getLabel(self):
+    # type: () -> str
+    return self._getString(1)
+  
+  def setLabel(self,  value):
     # type: (str) -> None
-    self._setString(3, value)
+    self._setString(1, value)
+    
+  def getValue(self):
+    # type: () -> float
+    return self._getReal(2)
+  
+  def setValue(self, value):
+    # type: (float) -> None
+    self._setReal(2, value)
 
 class Panel(ViewModel):
   def __init__(self, name, properties=1, commands=0):
@@ -257,12 +273,11 @@ class Panel(ViewModel):
     line.onButtonClick += onClickCallback
     return line
   
-  def addCheckboxLine(self, label, isChecked=False, checkboxType=CheckboxLine.CheckboxType.DEFAULT, onToggleCallback=None):
-    # type: (str, bool, str, Callable) -> None
+  def addCheckboxLine(self, label, isChecked=False, onToggleCallback=None):
+    # type: (str, bool, Callable) -> None
     line = CheckboxLine()
     line.setLabel(label)
     line.setIsChecked(isChecked)
-    line.setCheckboxType(checkboxType)
     self._addLine(line)
     if onToggleCallback is not None:
       line.onToggle += onToggleCallback
@@ -282,16 +297,26 @@ class Panel(ViewModel):
     self._addLine(line)
     return line
   
-  def addInputLine(self, label, value='', inputType=InputLine.InputType.TEXT, onChangeCallback=None):
-    # type: (str, str, str, Callable) -> None
-    line = InputLine()
+  def addTextInputLine(self, label, value='', onChangeCallback=None):
+    # type: (str, str, Callable) -> None
+    line = TextInputLine()
     line.setLabel(label)
     line.setValue(value)
-    line.setInputType(inputType)
     self._addLine(line)
     if onChangeCallback is not None:
       line.onChange += onChangeCallback
     return line
+  
+  def addNumberInputLine(self, label, value=0, onChangeCallback=None):
+    # type: (str, float, Callable) -> None
+    line = NumberInputLine()
+    line.setLabel(label)
+    line.setValue(value)
+    self._addLine(line)
+    if onChangeCallback is not None:
+      line.onChange += onChangeCallback
+    return line
+  
     
   @staticmethod
   def getLinesType():

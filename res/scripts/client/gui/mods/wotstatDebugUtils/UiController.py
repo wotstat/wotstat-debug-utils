@@ -4,35 +4,6 @@ from .DebugView import onDebugViewLoaded, onDebugViewUnloaded, DebugView
 from .models.UiModel import Panel
 
 import typing
-
-class Line:
-  def __init__(self):
-    pass
-  
-class TextLine(Line):
-  def __init__(self, text):
-    super().__init__()
-    self.text = text
-
-class ValueLine(Line):
-  def __init__(self, label, value):
-    super().__init__()
-    self.label = label
-    self.value = value
-
-class CheckboxLine(Line):
-  def __init__(self, label, initialState=False):
-    super().__init__()
-    self.onValueChange = SafeEvent()
-    self.label = label
-    self.state = initialState
-    
-class TextInputLine(Line):
-  def __init__(self, label, initialText=""):
-    super().__init__()
-    self.onValueChange = SafeEvent()
-    self.label = label
-    self.text = initialText
   
 class UiController:
   

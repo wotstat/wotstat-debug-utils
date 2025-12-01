@@ -1,0 +1,33 @@
+.user-panel-text-input-line-container {
+  .user-panel-text-input-line-label {
+    
+  }
+
+  .user-panel-text-input-line-value {
+    pointer-events: all;
+    color: rgb(238, 238, 238);
+    cursor: text;
+    border-radius: 2rem;
+    background-color: #ffffff21;
+    border: 1rem solid #545454;
+    transition: background-color 0.2s ease;
+    height: 14rem;
+    width: 80rem;
+    font-size: 11rem;
+    line-height: 1;
+    padding-left: 2rem;
+
+    font-family: PFDINMax;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+
+    &:hover {
+      background-color: #ffffff3b;
+    }
+
+    &::selection{
+      background-color: #949494;
+      color: #151515;
+    }
+  }
+}

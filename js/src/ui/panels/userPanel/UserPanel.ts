@@ -3,7 +3,9 @@ import { BasePanel } from '../panelController/PanelController'
 import { type BaseLine, type LineModel } from './lines'
 import { ButtonLine } from './lines/buttonLine/ButtonLine'
 import { CheckboxLine } from './lines/checkboxLine/CheckboxLine'
+import { NumberInputLine } from './lines/numberInoutLine/NumberInputLine'
 import { SeparatorLine } from './lines/separatorLine/Separator'
+import { TextInputLine } from './lines/textInoutLine/TextInputLine'
 import { TextLine } from './lines/textLine/TextLine'
 import { ValueLine } from './lines/valueLine/ValueLine'
 
@@ -21,6 +23,8 @@ const lineFactory: { [K in LineType]?: (userPanel: UserPanel) => BaseLine } = {
   'separator': userPanel => new SeparatorLine(userPanel),
   'value': userPanel => new ValueLine(userPanel),
   'checkbox': userPanel => new CheckboxLine(userPanel),
+  'text-input': userPanel => new TextInputLine(userPanel),
+  'number-input': userPanel => new NumberInputLine(userPanel),
 }
 
 export class UserPanel extends BasePanel {
