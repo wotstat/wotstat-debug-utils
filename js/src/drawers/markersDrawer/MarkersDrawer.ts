@@ -42,5 +42,7 @@ export class MarkerDrawer {
     for (let i = data.length; i < this.markers.length; i++) {
       this.markers[i].dispose()
     }
+
+    this.markers.length = data.length
   }
 }

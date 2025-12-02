@@ -90,15 +90,7 @@ class DebugView(ViewImpl):
       point0, point1, point2, point3
     )
 
-def get_parent_window():
-  ui_loader = dependency.instance(IGuiLoader)
-  if ui_loader and ui_loader.windowsManager:
-      return ui_loader.windowsManager.getMainWindow()
-  return None
-
 class WotstatDebugWindow(WindowImpl):
   
   def __init__(self):
-    super(WotstatDebugWindow, self).__init__(
-      wndFlags=WindowFlags.WINDOW, content=DebugView(), parent=get_parent_window()
-    )
+    super(WotstatDebugWindow, self).__init__(wndFlags=WindowFlags.WINDOW, content=DebugView())

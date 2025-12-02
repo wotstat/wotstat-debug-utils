@@ -195,6 +195,7 @@ export class LinesDrawer {
 
       ctx.lineWidth = group.width
       ctx.strokeStyle = group.color
+      ctx.lineJoin = 'round'
 
       ctx.beginPath()
       for (const line of group.lines) {

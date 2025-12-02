@@ -10,6 +10,7 @@ export class Marker {
   private textContent: string = ''
   private color: string = ''
   private size: number = 1
+  private added: boolean = false
 
   constructor(private readonly container: HTMLElement) {
     this.root = document.createElement('div')
@@ -23,10 +24,14 @@ export class Marker {
     this.text = document.createElement('div')
     this.text.classList.add('text')
     this.root.appendChild(this.text)
+
+    this.added = true
   }
 
   dispose() {
+    if (!this.added) return
     this.container.removeChild(this.root)
+    this.added = false
   }
 
   setup(data: { x: number, y: number, text: string, color: string, size: number, display: boolean }) {
@@ -41,7 +46,11 @@ export class Marker {
 
     if (this.textContent !== data.text) {
       this.textContent = data.text
-      this.text.innerHTML = data.text
+      if (data.text.split('\n').length > 1) {
+        this.text.innerHTML = data.text.split('\n').map(line => `<div>${line}</div>`).join('')
+      } else {
+        this.text.innerHTML = data.text
+      }
     }
 
     if (this.color !== data.color) {
@@ -54,7 +63,7 @@ export class Marker {
       this.circle.style.width = `${data.size}rem`
       this.circle.style.height = `${data.size}rem`
       this.text.style.left = `${data.size / 2}rem`
-      this.text.style.top = `${-data.size}rem`
+      this.text.style.top = `${-data.size / 2 - 3}rem`
     }
   }
 }

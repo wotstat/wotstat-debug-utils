@@ -1,5 +1,6 @@
 
-from ..mods.wotstatDebugUtils.UiController import UiController
+from ..mods.wotstatDebugUtils.ui.UiController import UiController
+from ..mods.wotstatDebugUtils.gizmos.GizmosController import GizmosController
 
-gizmos = None
+gizmos = GizmosController()
 ui = UiController()
