@@ -1,11 +1,7 @@
-import typing
-import Math
 from Event import SafeEvent
 from frameworks.wulf import WindowFlags, ViewSettings, ViewFlags
 from gui.impl.pub import ViewImpl, WindowImpl
-from skeletons.gui.impl import IGuiLoader
-from helpers import dependency
-from openwg_gameface import ModDynAccessor, gf_mod_inject
+from openwg_gameface import ModDynAccessor
 try: from GUI import WGMarkerPositionController as MarkerPositionController
 except ImportError: from GUI import MarkerPositionController
 
@@ -81,14 +77,8 @@ class DebugView(ViewImpl):
   def destroyBox(self, boxID):
     return self.boxMarkersManager.destroy(boxID)
   
-  def setupBox(self, boxID, width=None, color=None, 
-      center=None, w=None, h=None, d=None, rotationX=None, rotationY=None, rotationZ=None, rotationMatrix=None,
-      point0=None, point1=None, point2=None, point3=None):
-    self.boxMarkersManager.setup(
-      boxID, width, color, 
-      center, w, h, d, rotationX, rotationY, rotationZ, rotationMatrix,
-      point0, point1, point2, point3
-    )
+  def setupBox(self, boxID, width=None, color=None, p0=None, p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, p7=None):
+    self.boxMarkersManager.setup(boxID, width, color, p0, p1, p2, p3, p4, p5, p6, p7)
 
 class WotstatDebugWindow(WindowImpl):
   

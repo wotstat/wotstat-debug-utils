@@ -56,59 +56,25 @@ class BoxModel(ViewModel, IMarkerManageable):
     for i in range(8):
       self.getPoint(i).detach(markerCtrl)
       
-  def setup(self, markerCtrl, width=None, color=None, 
-      center=None, w=None, h=None, d=None, rotationX=None, rotationY=None, rotationZ=None, rotationMatrix=None,
-      point0=None, point1=None, point2=None, point3=None):
-    # type: (MarkerPositionController, float, str, Math.Vector3, float, float, float, float, float, float, Math.Matrix33, Math.Vector3, Math.Vector3, Math.Vector3, Math.Vector3) -> None
-
-    with self.transaction() as (tx):
       
-      if center is not None and w is not None and h is not None and d is not None:
-        # Setup by center, dimensions and rotation
-        rx = rotationX if rotationX is not None else 0.0
-        ry = rotationY if rotationY is not None else 0.0
-        rz = rotationZ if rotationZ is not None else 0.0
+  def setup(self, markerCtrl, width=None, color=None,
+            p0=None, p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, p7=None):
+    points = [p0, p1, p2, p3, p4, p5, p6, p7]
+    with self.transaction() as (tx):
+      for i in range(8):
+        tx.getPoint(i).attach(markerCtrl, points[i])
+      
+      if width is not None:
+        tx.setWidth(width)
         
-        if rotationMatrix is not None:
-          rotMat = rotationMatrix
-        else:
-          rotMat = Math.Matrix() # type: Math.Matrix
-          rotMat.setRotateYPR((ry, rx, rz))
-        
-        halfW = w / 2.0
-        halfH = h / 2.0
-        halfD = d / 2.0
-        
-        localPoints = [
-          Math.Vector3(-halfW, -halfH, -halfD),
-          Math.Vector3( halfW, -halfH, -halfD),
-          Math.Vector3( halfW,  halfH, -halfD),
-          Math.Vector3(-halfW,  halfH, -halfD),
-          Math.Vector3(-halfW, -halfH,  halfD),
-          Math.Vector3( halfW, -halfH,  halfD),
-          Math.Vector3( halfW,  halfH,  halfD),
-          Math.Vector3(-halfW,  halfH,  halfD),
-        ]
-        
-        for i in range(8):
-          worldPos = rotMat.applyVector(localPoints[i]) + center
-          tx.getPoint(i).attach(markerCtrl, worldPos)
-          
-      elif point0 is not None and point1 is not None and point2 is not None and point3 is not None:
-        # Setup by 4 corner points (the rest are calculated)
-        p0 = point0
-        p1 = point1
-        p2 = point2
-        p3 = point3
-        
-        u = (p1 - p0)
-        v = (p3 - p0)
-        p4 = p0 + u + v
-        p5 = p1 + v
-        p6 = p2 + u
-        p7 = p3 + u + v
-        
-        points = [p0, p1, p2, p3, p4, p5, p6, p7]
+      if color is not None:
+        tx.setColor(color)
+      
+  def setup(self, markerCtrl, width=None, color=None, p0=None, p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, p7=None):
+    
+    with self.transaction() as (tx):
+      points = [p0, p1, p2, p3, p4, p5, p6, p7]
+      if points.count(None) == 0:
         for i in range(8):
           tx.getPoint(i).attach(markerCtrl, points[i])
       
