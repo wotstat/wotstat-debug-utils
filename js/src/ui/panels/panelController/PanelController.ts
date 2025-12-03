@@ -13,7 +13,7 @@ export class BasePanel implements IPanel {
   protected readonly headerContentContainer: HTMLElement = document.createElement('div')
 
   constructor(name: string) {
-    this.panelElement.classList.add('panel')
+    this.panelElement.classList.add('panel', 'collapsed')
 
     this.headerElement.classList.add('panel-header')
     this.panelElement.appendChild(this.headerElement)

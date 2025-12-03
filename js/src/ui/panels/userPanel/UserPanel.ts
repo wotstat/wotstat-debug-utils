@@ -10,7 +10,6 @@ import { TextLine } from './lines/textLine/TextLine'
 import { ValueLine } from './lines/valueLine/ValueLine'
 
 
-
 export type PanelModel = {
   name: string
   lines: Array<ModelValue<LineModel>>
