@@ -1,9 +1,9 @@
 from frameworks.wulf import ViewModel, Array
-from .MarkerModel import MarkerModel
-from .LineModel import LineModel
-from .PolyLineModel import PolyLineModel
-from .BoxModel import BoxModel
-from .UiModel import UiModel
+from .gizmos.models.MarkerModel import MarkerModel
+from .gizmos.models.LineModel import LineModel
+from .gizmos.models.PolyLineModel import PolyLineModel
+from .gizmos.models.BoxModel import BoxModel
+from .ui.models.UiModel import UiModel
 
 class DebugViewModel(ViewModel):
   

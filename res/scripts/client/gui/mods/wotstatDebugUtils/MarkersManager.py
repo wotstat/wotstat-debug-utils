@@ -40,12 +40,10 @@ class MarkersManager(object):
     self.markersDict[markerID] = markerModel
     self.markersIndexes[markerID] = len(self.markers) - 1
     self._nextMarkerID += 1
-    logger.debug("Created marker %d" % markerID)
     return markerID
   
   def destroy(self, markerID):
     if markerID not in self.markersDict:
-      logger.error("Marker %d not found!" % markerID)
       return
     
     markerModel = self.markersDict[markerID] # type: IMarkerManageable

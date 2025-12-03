@@ -6,7 +6,7 @@ try: from GUI import WGMarkerPositionController as MarkerPositionController
 except ImportError: from GUI import MarkerPositionController
 
 from .Logger import Logger
-from .models.DebugViewModel import DebugViewModel
+from .DebugViewModel import DebugViewModel
 from .MarkersManager import MarkersManager
   
 WOTSTAT_DEBUG_UTILS_VIEW = 'WOTSTAT_DEBUG_UTILS_VIEW'

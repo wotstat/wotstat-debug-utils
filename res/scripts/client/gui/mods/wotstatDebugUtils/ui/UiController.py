@@ -1,6 +1,6 @@
 from ..DebugView import onDebugViewLoaded, onDebugViewUnloaded, DebugView
 
-from ..models.UiModel import Panel
+from .models.UiModel import Panel
 
 import typing
   

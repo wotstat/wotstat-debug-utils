@@ -1,7 +1,7 @@
 from frameworks.wulf import ViewModel, Array
 from .WorldPositionModel import OffscreenWorldPositionModel
 
-from ..MarkersManager import IMarkerManageable
+from ...MarkersManager import IMarkerManageable
 from .LineModel import LineEnd
 
 class PolyLineModel(ViewModel, IMarkerManageable):

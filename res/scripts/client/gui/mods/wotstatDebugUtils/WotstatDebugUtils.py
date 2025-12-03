@@ -15,7 +15,7 @@ except ImportError: pass
 from .DebugView import WotstatDebugWindow, WOTSTAT_DEBUG_UTILS_VIEW, DebugViewModel, DebugView
 from .Logger import Logger, SimpleLoggerBackend
 
-from .models.LineModel import LineEnd
+from .gizmos.models.LineModel import LineEnd
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'

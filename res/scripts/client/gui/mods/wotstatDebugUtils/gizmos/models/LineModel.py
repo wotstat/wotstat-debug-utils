@@ -1,7 +1,7 @@
 from frameworks.wulf import ViewModel
 from .WorldPositionModel import OffscreenWorldPositionModel
 
-from ..MarkersManager import IMarkerManageable
+from ...MarkersManager import IMarkerManageable
 
 class LineEnd:
   NONE = 0

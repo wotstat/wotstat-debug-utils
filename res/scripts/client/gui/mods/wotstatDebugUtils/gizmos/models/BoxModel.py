@@ -1,13 +1,7 @@
-import Math
-
 from frameworks.wulf import ViewModel
 from .WorldPositionModel import OffscreenWorldPositionModel
 
-from ..MarkersManager import IMarkerManageable
-import typing
-if typing.TYPE_CHECKING:
-  try: from GUI import WGMarkerPositionController as MarkerPositionController
-  except ImportError: from GUI import MarkerPositionController
+from ...MarkersManager import IMarkerManageable
 
 class BoxModel(ViewModel, IMarkerManageable):
   def __init__(self, properties=10, commands=0):

@@ -1,6 +1,6 @@
 from .WorldPositionModel import OffscreenWorldPositionModel
 
-from ..MarkersManager import IMarkerManageable
+from ...MarkersManager import IMarkerManageable
 
 class MarkerModel(OffscreenWorldPositionModel, IMarkerManageable):
   def __init__(self, properties=9, commands=0):
