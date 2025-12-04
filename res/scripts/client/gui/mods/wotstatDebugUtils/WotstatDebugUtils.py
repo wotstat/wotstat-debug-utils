@@ -16,6 +16,7 @@ from .DebugView import WotstatDebugWindow, WOTSTAT_DEBUG_UTILS_VIEW, DebugViewMo
 from .Logger import Logger, SimpleLoggerBackend
 
 from .gizmos.models.LineModel import LineEnd
+from .coreUtils.MainUtils import MainUtils
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
@@ -39,6 +40,9 @@ class WotstatDebugUtils(object):
     
     
     InputHandler.g_instance.onKeyUp += self.__handleKeyUpEvent
+    self.utils = [
+      MainUtils()
+    ]
 
   def dispose(self):
     logger.info("Stopping WotstatDebugUtils")

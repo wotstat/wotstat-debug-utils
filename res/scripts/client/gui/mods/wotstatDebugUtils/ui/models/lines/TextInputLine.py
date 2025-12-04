@@ -19,7 +19,7 @@ class TextInputLine(Line):
     
   def _finalize(self):
     self._onInputChangeCommand -= self._onInputChange
-    return super()._finalize()
+    return super(TextInputLine, self)._finalize()
   
   def _onInputChange(self, args={}):
     # type: (dict) -> None

@@ -1,4 +1,5 @@
 from ..DebugView import onDebugViewLoaded, onDebugViewUnloaded, DebugView
+from frameworks.wulf import Array
 
 from .models.UiModel import Panel
 
@@ -8,6 +9,7 @@ class UiController:
   
   def __init__(self):
     global onDebugViewLoaded, onDebugViewUnloaded
+    self.panelsArray = Array[Panel]()
     self.panels = [] # type: typing.List[Panel]
     self.panelIndexes = {} # type: typing.Dict[Panel, int]
     self.currentDebugView = None # type: DebugView
@@ -40,6 +42,7 @@ class UiController:
       panels = self.currentDebugView.viewModel.getUi().getPanels()
       panels.remove(panelIndex)
       panels.invalidate()
+      self.panelsArray.remove(panelIndex)
       
       del self.panelIndexes[panel]
       
@@ -50,6 +53,7 @@ class UiController:
     # type: (str) -> Panel
     panel = Panel(panelName)
     self.panels.append(panel)
+    self.panelsArray.addViewModel(panel)
     self.panelIndexes[panel] = len(self.panels) - 1
     
     if self.currentDebugView:

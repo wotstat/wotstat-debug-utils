@@ -72,8 +72,8 @@ class OffscreenWorldPositionModel(WorldPositionModel):
   def _initialize(self):
     # type: () -> None
     super(OffscreenWorldPositionModel, self)._initialize()
-    self._addRealProperty('ndcLimitX', 200)
-    self._addRealProperty('ndcLimitY', 200)
+    self._addRealProperty('ndcLimitX', 2000)
+    self._addRealProperty('ndcLimitY', 2000)
     
   def getNdcLimitX(self):
     # type: () -> float

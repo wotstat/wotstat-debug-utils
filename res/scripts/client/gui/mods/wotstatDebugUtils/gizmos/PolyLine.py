@@ -141,5 +141,5 @@ class PolyLine(object):
 
   def destroy(self):
     # type: () -> None
-    self._controller._destroyMarker(self)
+    self._controller._destroyPolyLine(self)
     

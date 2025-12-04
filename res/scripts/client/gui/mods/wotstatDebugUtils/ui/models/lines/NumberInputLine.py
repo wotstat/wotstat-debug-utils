@@ -18,7 +18,7 @@ class NumberInputLine(Line):
     
   def _finalize(self):
     self._onInputChangeCommand -= self._onInputChange
-    return super()._finalize()
+    return super(NumberInputLine, self)._finalize()
   
   def _onInputChange(self, args={}):
     # type: (dict) -> None

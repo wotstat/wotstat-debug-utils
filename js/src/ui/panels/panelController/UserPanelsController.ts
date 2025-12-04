@@ -25,6 +25,7 @@ export class UserPanelsController {
 
     for (let i = 0; i < model.ui.panels.length; i++) {
       const element = model.ui.panels[i]
+      if (!element.value) continue
       if (!this.existingPanels.has(element.id)) {
         const panel = new UserPanel(element.value.name, element.id)
         this.panelController.addPanel(panel)
@@ -35,15 +36,15 @@ export class UserPanelsController {
         panel.panel.updateModel(element.value)
       }
 
-      const targetPanels = new Set<string>(model.ui.panels.map(p => p.id))
-
-      for (const [panelId, panelModel] of this.existingPanels) {
-        if (!targetPanels.has(panelId)) {
-          this.panelController.removePanel(panelModel.panel)
-          this.existingPanels.delete(panelId)
-        }
-      }
     }
 
+    const targetPanels = new Set<string>(model.ui.panels.map(p => p.id))
+
+    for (const [panelId, panelModel] of this.existingPanels) {
+      if (!targetPanels.has(panelId)) {
+        this.panelController.removePanel(panelModel.panel)
+        this.existingPanels.delete(panelId)
+      }
+    }
   }
 }

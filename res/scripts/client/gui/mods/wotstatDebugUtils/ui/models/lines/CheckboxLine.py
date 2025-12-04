@@ -19,7 +19,7 @@ class CheckboxLine(Line):
     
   def _finalize(self):
     self._onCheckboxToggleCommand -= self._onCheckboxToggle
-    return super()._finalize()
+    return super(CheckboxLine, self)._finalize()
 
   def _onCheckboxToggle(self, args={}):
     # type: (dict) -> None
