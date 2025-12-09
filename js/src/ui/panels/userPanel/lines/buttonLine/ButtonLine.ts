@@ -1,5 +1,5 @@
 import { BaseLine, type ButtonLineModel } from '..'
-import type { UserPanel } from '../../UserPanel'
+import type { BasePanel } from '../../../panelController/PanelController'
 import './style.scss'
 
 export class ButtonLine extends BaseLine {
@@ -12,7 +12,7 @@ export class ButtonLine extends BaseLine {
   private label: string = ''
   private buttonText: string = ''
 
-  constructor(protected readonly userPanel: UserPanel) {
+  constructor(protected readonly userPanel: BasePanel) {
     super()
 
     const container = this.userPanel.createLineContainer()

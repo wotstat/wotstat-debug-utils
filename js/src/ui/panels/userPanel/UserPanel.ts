@@ -16,14 +16,14 @@ export type PanelModel = {
 }
 
 type LineType = LineModel['type']
-const lineFactory: { [K in LineType]?: (userPanel: UserPanel) => BaseLine } = {
-  'text': userPanel => new TextLine(userPanel),
-  'button': userPanel => new ButtonLine(userPanel),
-  'separator': userPanel => new SeparatorLine(userPanel),
-  'value': userPanel => new ValueLine(userPanel),
-  'checkbox': userPanel => new CheckboxLine(userPanel),
-  'text-input': userPanel => new TextInputLine(userPanel),
-  'number-input': userPanel => new NumberInputLine(userPanel),
+const lineFactory: { [K in LineType]?: (panel: BasePanel) => BaseLine } = {
+  'text': panel => new TextLine(panel),
+  'button': panel => new ButtonLine(panel),
+  'separator': panel => new SeparatorLine(panel),
+  'value': panel => new ValueLine(panel),
+  'checkbox': panel => new CheckboxLine(panel),
+  'text-input': panel => new TextInputLine(panel),
+  'number-input': panel => new NumberInputLine(panel),
 }
 
 export class UserPanel extends BasePanel {

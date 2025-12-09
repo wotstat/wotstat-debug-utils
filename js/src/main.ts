@@ -26,7 +26,9 @@ const markerDrawer = new MarkerDrawer(root)
 const linesDrawer = new LinesDrawer()
 const panel = new FloatingPanel(root)
 const panelController = new PanelController(panel.panel)
-const statisticsPanel = new StatisticsPanel()
+const statisticsPanel = new StatisticsPanel({
+  onShowDebugPositionsChange: (value) => displayDebugPositions = value
+})
 panelController.addPanel(statisticsPanel)
 
 const userPanelsController = new UserPanelsController(panelController)
@@ -38,6 +40,35 @@ const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
 let screenWidth = 0
 let screenHeight = 0
 let screenScale = 1
+let displayDebugPositions = false
+
+function getAllPointsFromModel(model: Model): Array<MarkerData> {
+  const additionalPoints: Array<MarkerData> = []
+
+  for (let i = 0; i < model.boxes.length; i++) {
+    const box = model.boxes[i]
+    const points = [box.value.p0, box.value.p1, box.value.p2, box.value.p3, box.value.p4, box.value.p5, box.value.p6, box.value.p7]
+    additionalPoints.push(...points.map((pt, idx) => ({
+      ...pt, scale: 0, size: 4, color: box.value.color, text: `${idx}`
+    })))
+  }
+
+  for (let i = 0; i < model.polyLines.length; i++) {
+    const polyline = model.polyLines[i]
+    additionalPoints.push(...polyline.value.points.map((pt, idx) => ({
+      ...pt.value, scale: 0, size: 4, color: polyline.value.color, text: `${idx}`
+    })))
+  }
+
+  for (let i = 0; i < model.lines.length; i++) {
+    const line = model.lines[i]
+    additionalPoints.push(...[line.value.p1, line.value.p2].map((pt, idx) => ({
+      ...pt, scale: 0, size: 4, color: line.value.color, text: `${idx}`
+    })))
+  }
+
+  return additionalPoints
+}
 
 function updateLoop() {
   requestAnimationFrame(() => updateLoop())
@@ -47,15 +78,12 @@ function updateLoop() {
   const model = window.model as Model | undefined
   if (!model) return
 
-  const t = model.boxes.map(box => {
-    const points = [box.value.p0, box.value.p1, box.value.p2, box.value.p3, box.value.p4, box.value.p5, box.value.p6, box.value.p7]
-    return points.map((point, i) => ({ posx: point.posx, posy: point.posy, scale: 0, isVisible: point.isVisible, size: 5, color: '#FF00FF', text: `${i}` }))
-  })
+  const additionalPoints: Array<MarkerData> = displayDebugPositions ? getAllPointsFromModel(model) : []
 
   const renderMarkerTimeStart = performance.now()
   markerDrawer.draw([
     ...model.markers.map(m => m.value),
-    ...t.flat()
+    ...additionalPoints
   ])
   const renderMarkerTimeMs = performance.now() - renderMarkerTimeStart
 
@@ -81,13 +109,12 @@ function updateLoop() {
     renderMarkerTimeMs,
     renderLinesTimeMs,
     prepareLinesTimeMs,
-    markersCount: model.markers.length + t.length * 8,
+    markersCount: model.markers.length + additionalPoints.length,
     simpleLinesCount: model.lines.length,
     polyLinesCount: model.polyLines.length,
     boxesCount: model.boxes.length
   })
 }
-
 
 function updateSize() {
   const { height, width } = viewEnv.getClientSizePx()

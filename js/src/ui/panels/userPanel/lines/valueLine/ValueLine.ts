@@ -1,5 +1,5 @@
 import { BaseLine, type TextLineModel, type ValueLineModel } from '..'
-import type { UserPanel } from '../../UserPanel'
+import type { BasePanel } from '../../../panelController/PanelController'
 import './style.scss'
 
 export class ValueLine extends BaseLine {
@@ -10,7 +10,7 @@ export class ValueLine extends BaseLine {
   private label: string = ''
   private value: string = ''
 
-  constructor(protected readonly userPanel: UserPanel) {
+  constructor(protected readonly userPanel: BasePanel) {
     super()
 
     const line = this.userPanel.createLine('', '')

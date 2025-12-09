@@ -1,4 +1,5 @@
 import math
+from math import pi, cos
 import typing
 
 import Math
@@ -6,6 +7,20 @@ import Math
 if typing.TYPE_CHECKING:
   from typing import List, Tuple, Optional
   from .GizmosController import GizmosController
+
+def easeInOutSine(t):
+  return -(cos(pi * t) - 1) / 2
+
+def interpolatePoints(start, end, segments, easeFunction=easeInOutSine):   
+  points = []
+  points.append(start)
+  for i in range(1, segments):
+    t = i / float(segments)
+    t = easeFunction(t)
+    point = start + (t * (end - start))
+    points.append(point)
+  points.append(end)
+  return points 
 
 class PolyLine(object):
   def __init__(self, controller):
@@ -88,7 +103,7 @@ class PolyLine(object):
     if closed is not None: self._closed = closed
     self._controller._setupPolyLine(self)
 
-  def setupCircle(self, center, normal, radius, segments):
+  def fromCircle(self, center, normal, radius, segments):
     # type: (Tuple[float, float, float], Tuple[float, float, float], float, int) -> None
     cx, cy, cz = center
     nx, ny, nz = normal
@@ -139,6 +154,61 @@ class PolyLine(object):
 
     self._setup(points=points, closed=True)
 
+  def fromStartEnd(self, start, end, segments):
+    # type: (Tuple[float, float, float], Tuple[float, float, float], int) -> None
+    sx, sy, sz = start
+    ex, ey, ez = end
+
+    direction = Math.Vector3(ex - sx, ey - sy, ez - sz)
+    length = direction.length
+    if length == 0:
+      raise ValueError("Start and end points must be different")
+
+    direction.normalise()
+
+    points = []
+    points.append(Math.Vector3(sx, sy, sz))
+    for i in range(1, segments):
+      t = i / float(segments)
+      px = sx + direction.x * length * t
+      py = sy + direction.y * length * t
+      pz = sz + direction.z * length * t
+      points.append(Math.Vector3(px, py, pz))
+      
+    points.append(Math.Vector3(ex, ey, ez))
+
+    self._setup(points=points)
+  
+  def fromAutoSegments(self, start, end, segmentLength=20, easeFunction=easeInOutSine):
+
+    sx, sy, sz = start
+    ex, ey, ez = end
+  
+    direction = Math.Vector3(ex - sx, ey - sy, ez - sz)
+    length = direction.length
+    if length == 0:
+      raise ValueError("Start and end points must be different")
+    
+    if length < 3.0:
+      self._setup(points=[Math.Vector3(sx, sy, sz), Math.Vector3(ex, ey, ez)])
+      return
+    
+    direction.normalise()
+    
+    offsetStart = Math.Vector3(sx, sy, sz) + direction
+    offsetEnd = Math.Vector3(ex, ey, ez) - direction
+    
+    if length < 6.0:
+      self._setup(points=[Math.Vector3(sx, sy, sz), offsetStart, offsetEnd, Math.Vector3(ex, ey, ez)])
+      return
+    
+    segments = max(3, int((length - 2) / segmentLength))
+    points = interpolatePoints(offsetStart, offsetEnd, segments, easeFunction)
+    points.insert(0, Math.Vector3(sx, sy, sz))
+    points.append(Math.Vector3(ex, ey, ez))
+    
+    self._setup(points=points)
+  
   def destroy(self):
     # type: () -> None
     self._controller._destroyPolyLine(self)

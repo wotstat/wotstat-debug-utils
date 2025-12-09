@@ -1,5 +1,5 @@
 import { BaseLine, type TextLineModel } from '..'
-import type { UserPanel } from '../../UserPanel'
+import type { BasePanel } from '../../../panelController/PanelController'
 import './style.scss'
 
 export class TextLine extends BaseLine {
@@ -8,7 +8,7 @@ export class TextLine extends BaseLine {
   private readonly textElement: HTMLElement
   private text: string = ''
 
-  constructor(protected readonly userPanel: UserPanel) {
+  constructor(protected readonly userPanel: BasePanel) {
     super()
 
     const container = this.userPanel.createLineContainer()

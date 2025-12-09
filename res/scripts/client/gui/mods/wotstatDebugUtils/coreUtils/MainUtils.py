@@ -49,13 +49,13 @@ class MainUtils(object):
     hangarSpace = dependency.instance(IHangarSpace)
     spaceID = hangarSpace.spaceID if hangarSpace is not None and hangarSpace.spaceID is not None else BigWorld.player().spaceID
     
-    STEP = 50
     collision = collideSegment(spaceID, startPoint, endPoint)
     if collision is None:
-      points = [startPoint + ray * i * STEP for i in range(100)]
-      self.lines.append(gizmos.createPolyLine(points, 1, NiceColors.RED))
+      line = gizmos.createPolyLine(width=1, color=NiceColors.RED)
+      line.fromAutoSegments(startPoint, endPoint)
+      self.lines.append(line)
     else:
-      points = [startPoint + ray * i * STEP for i in range(1, int((collision.closestPoint - startPoint).length / STEP))]
-      points.append(collision.closestPoint)
-      points.insert(0, startPoint)
-      self.lines.append(gizmos.createPolyLine(points, 1, NiceColors.GREEN))
+      line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN)
+      line.fromAutoSegments(startPoint, collision.closestPoint)
+      self.lines.append(line)
+      

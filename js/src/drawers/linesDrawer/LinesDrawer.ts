@@ -39,6 +39,13 @@ type Line = {
   points: { x: number, y: number }[]
 }
 
+function rotateVector(vec: { x: number, y: number }, angle: number, scale: number = 1): { x: number, y: number } {
+  return {
+    x: (vec.x * Math.cos(angle) - vec.y * Math.sin(angle)) * scale,
+    y: (vec.x * Math.sin(angle) + vec.y * Math.cos(angle)) * scale
+  }
+}
+
 export class LinesDrawer {
 
   private linesGroup: Map<string, {
@@ -74,20 +81,45 @@ export class LinesDrawer {
     const arrowSize = 5 * (1 + width / 2 - 0.5)
     const arrowAngle = Math.PI / 6 // 30 degrees
 
-    const leftArrowVec = {
-      x: unitVec.x * Math.cos(arrowAngle) - unitVec.y * Math.sin(arrowAngle),
-      y: unitVec.x * Math.sin(arrowAngle) + unitVec.y * Math.cos(arrowAngle)
-    }
-
-    const rightArrowVec = {
-      x: unitVec.x * Math.cos(-arrowAngle) - unitVec.y * Math.sin(-arrowAngle),
-      y: unitVec.x * Math.sin(-arrowAngle) + unitVec.y * Math.cos(-arrowAngle)
-    }
+    const leftArrowVec = rotateVector(unitVec, arrowAngle, arrowSize)
+    const rightArrowVec = rotateVector(unitVec, -arrowAngle, arrowSize)
 
     return [
-      [p1[0] - leftArrowVec.x * arrowSize, p1[1] - leftArrowVec.y * arrowSize],
+      [p1[0] - leftArrowVec.x, p1[1] - leftArrowVec.y],
       [p1[0], p1[1]],
-      [p1[0] - rightArrowVec.x * arrowSize, p1[1] - rightArrowVec.y * arrowSize]
+      [p1[0] - rightArrowVec.x, p1[1] - rightArrowVec.y]
+    ]
+  }
+
+  private continueAtPoint(p1: { x: number, y: number }, p2: { x: number, y: number }, width: number): { x: number, y: number }[] {
+    const vec = {
+      x: p1.x - p2.x,
+      y: p1.y - p2.y
+    }
+
+    const length = Math.sqrt(vec.x * vec.x + vec.y * vec.y)
+    if (length === 0) return []
+
+    const unitVec = {
+      x: vec.x / length,
+      y: vec.y / length
+    }
+
+    const arrowSize = 2.5 * (1 + width / 2 - 0.5)
+    const arrowAngle = Math.PI / 4 // 45 degrees
+
+    const pos = rotateVector(unitVec, arrowAngle, arrowSize)
+
+    const offset1 = rotateVector(unitVec, Math.PI / 2, arrowSize * 1.2)
+    const offset2 = rotateVector(unitVec, -Math.PI / 2, arrowSize * 0.5)
+
+    const r1 = { x: p1.x - offset1.x - unitVec.x * 1.3, y: p1.y - offset1.y - unitVec.y * 1.3 }
+    const r2 = { x: p1.x - offset2.x - unitVec.x * 1.3, y: p1.y - offset2.y - unitVec.y * 1.3 }
+    return [
+      r1,
+      { x: r1.x + pos.x, y: r1.y + pos.y },
+      r2,
+      { x: r2.x + pos.x, y: r2.y + pos.y },
     ]
   }
 
@@ -120,20 +152,32 @@ export class LinesDrawer {
       const group = this.getGroup(lineData.color, lineData.width)
       const segments: Line[] = []
 
-      //       if (lineData.closed && line.points.length >= 2) {
-      //   line.points.push({ x: line.points[0].x, y: line.points[0].y })
-      // }
-
       let line: Line = { points: [] }
+      let nextPointIsConnected = false
       for (let i = 0; i < lineData.points.length; i++) {
         const point = lineData.points[i].value
+
         if (point.isVisible === false) {
-          if (line.points.length > 0) {
+          nextPointIsConnected = true
+          if (line.points.length > 1) {
             segments.push(line)
+            if (line.points.length >= 2) {
+              group.lines.push({
+                points: this.continueAtPoint(line.points[line.points.length - 1], line.points[line.points.length - 2], lineData.width)
+              })
+            }
             line = { points: [] }
           }
           continue
         }
+
+        if (nextPointIsConnected && line.points.length > 0) {
+          group.lines.push({
+            points: this.continueAtPoint(line.points[line.points.length - 1], { x: point.posx, y: point.posy }, lineData.width)
+          })
+          nextPointIsConnected = false
+        }
+
         line.points.push({ x: point.posx, y: point.posy })
       }
 

@@ -1,7 +1,7 @@
-import { BaseLine, type CheckboxLineModel, type TextLineModel } from '..'
-import type { UserPanel } from '../../UserPanel'
+import { BaseLine, type CheckboxLineModel } from '..'
 import './style.scss'
 import CheckmkBold from './assets/chekmark-bold.svg?raw'
+import type { BasePanel } from '../../../panelController/PanelController'
 
 export class CheckboxLine extends BaseLine {
   type = 'checkbox' as const
@@ -15,7 +15,7 @@ export class CheckboxLine extends BaseLine {
   private label: string = ''
   private checked: boolean = false
 
-  constructor(protected readonly userPanel: UserPanel) {
+  constructor(protected readonly userPanel: BasePanel) {
     super()
 
     const container = this.userPanel.createLineContainer()
@@ -37,7 +37,6 @@ export class CheckboxLine extends BaseLine {
     this.buttonElement.addEventListener('mousedown', e => e.stopPropagation())
 
     this.buttonElement.addEventListener('click', (e) => this.onClick())
-    // this.buttonElement.style.backgroundImage = `url(${CheckmkBold})`
 
     this.updateCheckedClass()
   }

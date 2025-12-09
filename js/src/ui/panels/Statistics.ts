@@ -1,5 +1,6 @@
 import { useThrottle } from '../../utils/useThrottle'
 import { BasePanel } from './panelController/PanelController'
+import { CheckboxLine } from './userPanel/lines/checkboxLine/CheckboxLine'
 
 type StatisticsLine = {
   line: HTMLElement
@@ -18,12 +19,15 @@ export class StatisticsPanel extends BasePanel {
   private readonly polyLinesCount: StatisticsLine
   private readonly boxesCount: StatisticsLine
   private readonly totalTimeHeader: HTMLElement
+  public readonly showDebugPositionsCheckbox: CheckboxLine
 
   private readonly throttleUpdate = useThrottle((totalTimeMs: number) => {
     this.totalTimeHeader.textContent = `${totalTimeMs.toFixed(2)}ms`
   }, 300)
 
-  constructor() {
+  constructor(private readonly options?: {
+    onShowDebugPositionsChange?: (value: boolean) => void
+  }) {
     super('Statistics')
 
     this.totalTime = this.createLine('Total time', '0 ms')
@@ -35,6 +39,15 @@ export class StatisticsPanel extends BasePanel {
     this.simpleLinesCount = this.createLine('Simple lines count', '0')
     this.polyLinesCount = this.createLine('Poly lines count', '0')
     this.boxesCount = this.createLine('Boxes count', '0')
+    this.createSeparator()
+
+    this.showDebugPositionsCheckbox = new CheckboxLine(this)
+    this.showDebugPositionsCheckbox.update({
+      type: 'checkbox',
+      label: 'Show ALL position points',
+      isChecked: false,
+      onCheckboxToggle: ({ value }) => this.options?.onShowDebugPositionsChange?.(value)
+    })
 
     this.totalTimeHeader = document.createElement('p')
     this.headerContentContainer.appendChild(this.totalTimeHeader)
