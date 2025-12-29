@@ -17,7 +17,7 @@ rem Target:
 rem  - if passed as 1st argument: use that
 rem  - otherwise: "target" folder next to the .bat
 if "%~1"=="" (
-    set "DEST=F:\Games\World_of_Tanks_EU\res_mods\2.1.0.1\gui\gameface\mods\wotstat-debug-utils"
+    set "DEST=F:\Games\World_of_Tanks_EU\res_mods\2.1.0.2\gui\gameface\mods\wotstat-debug-utils"
 ) else (
     set "DEST=%~1"
 )

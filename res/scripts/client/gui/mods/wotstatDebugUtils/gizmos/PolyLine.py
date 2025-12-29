@@ -191,7 +191,7 @@ class PolyLine(object):
     
     if length < 3.0:
       self._setup(points=[Math.Vector3(sx, sy, sz), Math.Vector3(ex, ey, ez)])
-      return
+      return self
     
     direction.normalise()
     
@@ -200,7 +200,7 @@ class PolyLine(object):
     
     if length < 6.0:
       self._setup(points=[Math.Vector3(sx, sy, sz), offsetStart, offsetEnd, Math.Vector3(ex, ey, ez)])
-      return
+      return self
     
     segments = max(3, int((length - 2) / segmentLength))
     points = interpolatePoints(offsetStart, offsetEnd, segments, easeFunction)
@@ -208,6 +208,7 @@ class PolyLine(object):
     points.append(Math.Vector3(ex, ey, ez))
     
     self._setup(points=points)
+    return self
   
   def destroy(self):
     # type: () -> None

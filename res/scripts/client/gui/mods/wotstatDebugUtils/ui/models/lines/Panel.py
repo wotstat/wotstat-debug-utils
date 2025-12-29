@@ -48,14 +48,14 @@ class Panel(ViewModel):
     lines.invalidate()
     
   def addTextLine(self, text):
-    # type: (str) -> None
+    # type: (str) -> TextLine
     line = TextLine()
     line.text = text
     self._addLine(line)
     return line
     
   def addButtonLine(self, label, buttonText, onClickCallback):
-    # type: (str, str, Callable) -> None
+    # type: (str, str, Callable) -> ButtonLine
     line = ButtonLine()
     line.label = label
     line.buttonText = buttonText
@@ -64,7 +64,7 @@ class Panel(ViewModel):
     return line
   
   def addCheckboxLine(self, label, isChecked=False, onToggleCallback=None):
-    # type: (str, bool, Callable) -> None
+    # type: (str, bool, Callable) -> CheckboxLine
     line = CheckboxLine()
     line.label = label
     line.isChecked = isChecked
@@ -74,7 +74,7 @@ class Panel(ViewModel):
     return line
   
   def addValueLine(self, label, value):
-    # type: (str, str) -> None
+    # type: (str, str) -> ValueLine
     line = ValueLine()
     line.label = label
     line.value = value
@@ -82,13 +82,13 @@ class Panel(ViewModel):
     return line
   
   def addSeparatorLine(self):
-    # type: () -> None
+    # type: () -> SeparatorLine
     line = SeparatorLine()
     self._addLine(line)
     return line
   
   def addTextInputLine(self, label, value='', onChangeCallback=None):
-    # type: (str, str, Callable) -> None
+    # type: (str, str, Callable) -> TextInputLine
     line = TextInputLine()
     line.label = label
     line.value = value
@@ -98,7 +98,7 @@ class Panel(ViewModel):
     return line
   
   def addNumberInputLine(self, label, value=0, onChangeCallback=None):
-    # type: (str, float, Callable) -> None
+    # type: (str, float, Callable) -> NumberInputLine
     line = NumberInputLine()
     line.label = label
     line.value = value
@@ -119,3 +119,16 @@ class Panel(ViewModel):
     for line in self.getLines():
       if isinstance(line, ButtonLine):
         line.onButtonClick -= None # remove all listeners
+        
+  def removeLine(self, line):
+    # type: (Line) -> None
+    lines = self.lines
+    index = -1
+    for i in range(len(lines)):
+      if lines.getViewModel(i) == line:
+        index = i
+        break
+      
+    if index != -1:
+      lines.remove(index)
+      lines.invalidate()

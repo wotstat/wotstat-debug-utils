@@ -53,4 +53,9 @@ export type LineModel = TextLineModel |
 export abstract class BaseLine {
   abstract readonly type: LineModel['type']
   abstract update(model: LineModel): void
+
+  protected applyLabelPadding(element: HTMLElement) {
+    const startWhiteSpace = element.textContent?.match(/^\s*/)?.[0].length ?? 0
+    element.style.paddingLeft = `${startWhiteSpace / 4}em`
+  }
 }

@@ -60,6 +60,7 @@ export class CheckboxLine extends BaseLine {
     if (this.label !== newLabel) {
       this.label = newLabel
       this.labelElement.textContent = this.label
+      this.applyLabelPadding(this.labelElement)
     }
 
     const newChecked = model.isChecked

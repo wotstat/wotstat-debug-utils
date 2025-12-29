@@ -87,9 +87,18 @@ function updateLoop() {
   ])
   const renderMarkerTimeMs = performance.now() - renderMarkerTimeStart
 
+
+  // let colors = [
+  //   '#ff0000', '#00ff00', '#0000ff',
+  //   '#ffff00', '#00ffff', '#ff00ff',
+  //   '#880000', '#008800', '#000088',
+  // ]
+  // let colorIndex = 0
+
   const prepareStartTime = performance.now()
   linesDrawer.prepareSimpleLine(model.lines.map(l => l.value))
   linesDrawer.preparePolyLine(model.polyLines.map(p => p.value))
+  // linesDrawer.preparePolyLine(model.polyLines.map(p => ({ ...p.value, color: colors[colorIndex++ % colors.length] })))
   linesDrawer.prepareBoxes(model.boxes.map(b => b.value))
   const prepareLinesTimeMs = performance.now() - prepareStartTime
 

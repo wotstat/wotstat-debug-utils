@@ -16,7 +16,7 @@ from .DebugView import WotstatDebugWindow, WOTSTAT_DEBUG_UTILS_VIEW, DebugViewMo
 from .Logger import Logger, SimpleLoggerBackend
 
 from .gizmos.models.LineModel import LineEnd
-from .coreUtils.MainUtils import MainUtils
+from .coreUtils.mainUtils import MainUtils
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
