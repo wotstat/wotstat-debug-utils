@@ -24,10 +24,16 @@ class RaycastUtil(object):
   def __init__(self, panel):
     # type: (Panel) -> None
     self.panel = panel
+    self.showMatInfo = False
+    self.header = self.panel.addHeaderLine('Raycast')
     self.raycastLine = self.panel.addCheckboxLine('Raycast line (MMB)', onToggleCallback=self.onRaycastToggle)
     self.raycastMatInfo = self.panel.addCheckboxLine('  Mat info', onToggleCallback=self.onMatInfoToggle)
     self.lines = [] # type: list[PolyLine]
     self.markers = [] # type: list[Marker]
+    
+    self.lastSegments = None # type: typing.Optional[typing.List[typing.Tuple[Math.Vector3, any, SegmentCollisionResultExt]]]
+    self.lastStartPoint = None # type: typing.Optional[Math.Vector3]
+    self.lastEndPoint = None # type: typing.Optional[Math.Vector3]
     
   def dispose(self):
     self.clear()
@@ -35,7 +41,8 @@ class RaycastUtil(object):
     self.panel.removeLine(self.raycastMatInfo)
 
   def onMatInfoToggle(self, value):
-    self.clear()
+    self.showMatInfo = value
+    self.render()
 
   def onRaycastToggle(self, value):
     if value:
@@ -43,6 +50,9 @@ class RaycastUtil(object):
     else:
       InputHandler.g_instance.onKeyUp -= self.handleKeyUpEvent
       self.clear()
+      self.lastSegments = None
+      self.lastStartPoint = None
+      self.lastEndPoint = None
       
   def clear(self):
     for line in self.lines: line.destroy()
@@ -56,7 +66,7 @@ class RaycastUtil(object):
     if event.key != Keys.KEY_MIDDLEMOUSE: return
     self.raycast()
 
-  def raycast(self):    
+  def raycast(self):
     self.clear()
     
     cursorPosition = GUI.mcursor().position
@@ -112,6 +122,20 @@ class RaycastUtil(object):
           segments.append((res[0], None, None))
           currentPoint = res[0] + ray * 0.01
     
+    self.lastSegments = segments
+    self.lastStartPoint = startPoint
+    self.lastEndPoint = endPoint
+    
+    self.render()
+      
+  def render(self):
+    self.clear()
+    if self.lastSegments is None: return
+    
+    segments = self.lastSegments
+    startPoint = self.lastStartPoint
+    endPoint = self.lastEndPoint
+        
     farthestPoint = None
     farthestDist = 0
     
@@ -121,13 +145,18 @@ class RaycastUtil(object):
         farthestDist = dist
         farthestPoint = pos
     
-    
     lastPoint = startPoint
     for pos, _, _ in segments:
+      if (lastPoint - pos).length < 0.01: continue
       line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN if farthestPoint else NiceColors.RED)
       line.fromAutoSegments(lastPoint, pos)
       self.lines.append(line)
       lastPoint = pos
+      
+    if len(segments) > 0 and segments[-1][2] is not None and (lastPoint - endPoint).length < 0.01:
+      line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN)
+      line.fromAutoSegments(lastPoint, endPoint)
+      self.lines.append(line)
       
     if len(segments) == 0:
       line = gizmos.createPolyLine(width=1, color=NiceColors.RED)
@@ -141,6 +170,9 @@ class RaycastUtil(object):
         armorText = str(int(seg.matInfo.armor)) if int(seg.matInfo.armor) == seg.matInfo.armor else str(round(seg.matInfo.armor, 2))
         angleText = str(round(math.degrees(math.acos(seg.hitAngleCos)), 1))
         l = armorText + 'mm (' + angleText + '°)'
+        
+        if not self.showMatInfo: l = None
+        
         self.markers.append(gizmos.createMarker(pos, size=5, text=l, color=NiceColors.GREEN))
       else:
         self.markers.append(gizmos.createMarker(pos, size=5, color=NiceColors.GREEN))

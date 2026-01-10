@@ -1,6 +1,7 @@
 
 from ..mods.wotstatDebugUtils.ui.UiController import UiController
 from ..mods.wotstatDebugUtils.gizmos.GizmosController import GizmosController
+from ..mods.wotstatDebugUtils.gizmos.models.LineModel import LineEnd
 
 gizmos = GizmosController()
 ui = UiController()
@@ -16,3 +17,5 @@ class NiceColors:
   RED = '#FF453A'
   TEAL = '#64D2FF'
   YELLOW = '#FFD60A'
+  
+LineEnd = LineEnd

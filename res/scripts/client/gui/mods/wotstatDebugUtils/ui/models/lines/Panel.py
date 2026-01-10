@@ -1,6 +1,7 @@
 from frameworks.wulf import ViewModel, Array
 from .Line import Line
 from .TextLine import TextLine
+from .HeaderLine import HeaderLine
 from .ButtonLine import ButtonLine
 from .CheckboxLine import CheckboxLine
 from .ValueLine import ValueLine
@@ -46,7 +47,14 @@ class Panel(ViewModel):
     lines = self.lines
     lines.addViewModel(line)
     lines.invalidate()
-    
+  
+  def addHeaderLine(self, text):
+    # type: (str) -> None
+    line = HeaderLine()
+    line.text = text
+    self._addLine(line)
+    return line
+  
   def addTextLine(self, text):
     # type: (str) -> TextLine
     line = TextLine()

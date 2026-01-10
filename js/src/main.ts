@@ -7,7 +7,7 @@ import { MarkerDrawer, type MarkerData } from './drawers/markersDrawer/MarkersDr
 import { FloatingPanel } from './ui/floatingPanel/FloatingPanel'
 import { PanelController } from './ui/panels/panelController/PanelController'
 import { UserPanelsController } from './ui/panels/panelController/UserPanelsController'
-import { StatisticsPanel } from './ui/panels/Statistics'
+import { StatisticsPanel } from './ui/panels/StatisticsPanel'
 import { ReactiveModel } from './utils/ReactiveModel'
 import type { ModelValue } from './utils/types'
 
@@ -27,7 +27,8 @@ const linesDrawer = new LinesDrawer()
 const panel = new FloatingPanel(root)
 const panelController = new PanelController(panel.panel)
 const statisticsPanel = new StatisticsPanel({
-  onShowDebugPositionsChange: (value) => displayDebugPositions = value
+  onShowDebugPositionsChange: (value) => displayDebugPositions = value,
+  onDebugColorizedLinesChange: (value) => debugColorizedLines = value
 })
 panelController.addPanel(statisticsPanel)
 
@@ -41,6 +42,7 @@ let screenWidth = 0
 let screenHeight = 0
 let screenScale = 1
 let displayDebugPositions = false
+let debugColorizedLines = false
 
 function getAllPointsFromModel(model: Model): Array<MarkerData> {
   const additionalPoints: Array<MarkerData> = []
@@ -70,6 +72,12 @@ function getAllPointsFromModel(model: Model): Array<MarkerData> {
   return additionalPoints
 }
 
+const colors = [
+  '#ff0000', '#00ff00', '#0000ff',
+  '#ffff00', '#00ffff', '#ff00ff',
+  '#880000', '#008800', '#000088',
+]
+
 function updateLoop() {
   requestAnimationFrame(() => updateLoop())
 
@@ -88,17 +96,17 @@ function updateLoop() {
   const renderMarkerTimeMs = performance.now() - renderMarkerTimeStart
 
 
-  // let colors = [
-  //   '#ff0000', '#00ff00', '#0000ff',
-  //   '#ffff00', '#00ffff', '#ff00ff',
-  //   '#880000', '#008800', '#000088',
-  // ]
-  // let colorIndex = 0
+  let colorIndex = 0
 
   const prepareStartTime = performance.now()
-  linesDrawer.prepareSimpleLine(model.lines.map(l => l.value))
-  linesDrawer.preparePolyLine(model.polyLines.map(p => p.value))
-  // linesDrawer.preparePolyLine(model.polyLines.map(p => ({ ...p.value, color: colors[colorIndex++ % colors.length] })))
+  if (!debugColorizedLines) {
+    linesDrawer.prepareSimpleLine(model.lines.map(l => l.value))
+    linesDrawer.preparePolyLine(model.polyLines.map(p => p.value))
+  } else {
+    linesDrawer.prepareSimpleLine(model.lines.map(l => ({ ...l.value, color: colors[colorIndex++ % colors.length] })))
+    linesDrawer.preparePolyLine(model.polyLines.map(p => ({ ...p.value, color: colors[colorIndex++ % colors.length] })))
+  }
+
   linesDrawer.prepareBoxes(model.boxes.map(b => b.value))
   const prepareLinesTimeMs = performance.now() - prepareStartTime
 

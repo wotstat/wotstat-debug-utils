@@ -20,13 +20,15 @@ export class StatisticsPanel extends BasePanel {
   private readonly boxesCount: StatisticsLine
   private readonly totalTimeHeader: HTMLElement
   public readonly showDebugPositionsCheckbox: CheckboxLine
+  public readonly debugColorizedLinesCheckbox: CheckboxLine
 
   private readonly throttleUpdate = useThrottle((totalTimeMs: number) => {
     this.totalTimeHeader.textContent = `${totalTimeMs.toFixed(2)}ms`
   }, 300)
 
   constructor(private readonly options?: {
-    onShowDebugPositionsChange?: (value: boolean) => void
+    onShowDebugPositionsChange?: (value: boolean) => void,
+    onDebugColorizedLinesChange?: (value: boolean) => void
   }) {
     super('Statistics')
 
@@ -44,9 +46,17 @@ export class StatisticsPanel extends BasePanel {
     this.showDebugPositionsCheckbox = new CheckboxLine(this)
     this.showDebugPositionsCheckbox.update({
       type: 'checkbox',
-      label: 'Show ALL position points',
+      label: 'Show position points (debug)',
       isChecked: false,
       onCheckboxToggle: ({ value }) => this.options?.onShowDebugPositionsChange?.(value)
+    })
+
+    this.debugColorizedLinesCheckbox = new CheckboxLine(this)
+    this.debugColorizedLinesCheckbox.update({
+      type: 'checkbox',
+      label: 'Rainbow lines (debug)',
+      isChecked: false,
+      onCheckboxToggle: ({ value }) => this.options?.onDebugColorizedLinesChange?.(value)
     })
 
     this.totalTimeHeader = document.createElement('p')

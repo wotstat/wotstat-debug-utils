@@ -86,6 +86,17 @@ export class BasePanel implements IPanel {
     this.contentElement.appendChild(separator)
   }
 
+  createHeader(text: string): HTMLElement {
+    const header = document.createElement('div')
+    header.classList.add('panel-header-line')
+    header.textContent = text
+
+    const isFirstChild = this.contentElement.children.length === 0
+    if (isFirstChild) header.classList.add('first-child')
+    this.contentElement.appendChild(header)
+    return header
+  }
+
   removeLineContainer(line: HTMLElement): void {
     if (line.parentElement === this.contentElement) {
       this.contentElement.removeChild(line)

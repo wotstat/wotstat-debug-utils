@@ -78,6 +78,18 @@
         margin-bottom: 3rem;
       }
 
+      .panel-header-line {
+        margin-top: 1em;
+        font-size: 10rem;
+        color: #8f8f8f;
+        font-weight: 1000;
+        text-transform: uppercase;
+
+        &.first-child {
+          margin-top: 0;
+        }
+      }
+
       .panel-line-value {
         font-variant-numeric: tabular-nums;
       }

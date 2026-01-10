@@ -42,13 +42,20 @@ export type SeparatorLineModel = {
   type: 'separator'
 }
 
-export type LineModel = TextLineModel |
+export type HeaderLineModel = {
+  type: 'header',
+  text: string
+}
+
+export type LineModel =
+  TextLineModel |
   ButtonLineModel |
   TextInputLineModel |
   NumberInputLineModel |
   CheckboxLineModel |
   ValueLineModel |
-  SeparatorLineModel
+  SeparatorLineModel |
+  HeaderLineModel
 
 export abstract class BaseLine {
   abstract readonly type: LineModel['type']
