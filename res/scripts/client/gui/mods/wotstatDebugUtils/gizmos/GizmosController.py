@@ -187,7 +187,8 @@ class GizmosController:
       boxID = self._currentDebugView.createBox()
       self._boxes[box] = boxID
       box._setup(width=width, color=color)
-      box.fromCenterSizeRotation(center, w, h, d, rotationX, rotationY, rotationZ)
+      if center is not None and w is not None and h is not None and d is not None:
+        box.fromCenterSizeRotation(center, w, h, d, rotationX, rotationY, rotationZ)
       if timeout is not None: BigWorld.callback(timeout, box.destroy)
     
     return box
@@ -204,7 +205,12 @@ class GizmosController:
     for polyLine in self._polyLines.keys():
       self._destroyPolyLine(polyLine)
       
+  def clearBoxes(self):
+    for box in self._boxes.keys():
+      self._destroyBox(box)
+      
   def clearAll(self):
     self.clearMarkers()
     self.clearLines()
     self.clearPolyLines()
+    self.clearBoxes()

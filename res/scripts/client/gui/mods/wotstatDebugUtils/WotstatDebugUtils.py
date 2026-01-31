@@ -17,6 +17,7 @@ from .Logger import Logger, SimpleLoggerBackend
 
 from .gizmos.models.LineModel import LineEnd
 from .coreUtils.mainUtils import MainUtils
+from .coreUtils.freeCamera import FreeCameraUtils
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
@@ -41,7 +42,8 @@ class WotstatDebugUtils(object):
     
     InputHandler.g_instance.onKeyUp += self.__handleKeyUpEvent
     self.utils = [
-      MainUtils()
+      MainUtils(),
+      FreeCameraUtils()
     ]
 
   def dispose(self):
