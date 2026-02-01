@@ -1,7 +1,11 @@
+import BigWorld
+import Keys
 from Event import SafeEvent
 from frameworks.wulf import WindowFlags, ViewSettings, ViewFlags
 from gui.impl.pub import ViewImpl, WindowImpl
 from openwg_gameface import ModDynAccessor
+from gui import InputHandler
+
 try: from GUI import WGMarkerPositionController as MarkerPositionController
 except ImportError: from GUI import MarkerPositionController
 
@@ -29,6 +33,8 @@ class DebugView(ViewImpl):
     self.lineMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getLinesType(), self.viewModel.getLines())
     self.polyLineMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getPolyLinesType(), self.viewModel.getPolyLines())
     self.boxMarkersManager = MarkersManager(self.markersCtrl, self.viewModel.getBoxesType(), self.viewModel.getBoxes())
+    InputHandler.g_instance.onKeyUp += self._handleKeyUpEvent
+    self.visible = False
 
 
   @property
@@ -42,8 +48,15 @@ class DebugView(ViewImpl):
 
   def _finalize(self):
     onDebugViewUnloaded(self)
+    InputHandler.g_instance.onKeyUp -= self._handleKeyUpEvent
     super(DebugView, self)._finalize()
-    
+  
+  def _handleKeyUpEvent(self, event):
+    # type: (BigWorld.KeyEvent) -> None
+    if event.key == Keys.KEY_F2:
+      self.visible = not self.visible
+      self.viewModel.setVisible(self.visible)
+
   def createMarker(self):
     return self.pointMarkersManager.create()
   

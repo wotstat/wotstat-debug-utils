@@ -7,7 +7,7 @@ from .ui.models.UiModel import UiModel
 
 class DebugViewModel(ViewModel):
   
-  def __init__(self, properties=5, commands=0):
+  def __init__(self, properties=6, commands=0):
     # type: (int, int) -> None
     super(DebugViewModel, self).__init__(properties=properties, commands=commands)
   
@@ -19,6 +19,7 @@ class DebugViewModel(ViewModel):
     self._addArrayProperty('polyLines', Array())
     self._addArrayProperty('boxes', Array())
     self._addViewModelProperty('ui', UiModel())
+    self._addBoolProperty('visible', False)
 
   def getMarkers(self):
     # type: () -> Array
@@ -59,6 +60,14 @@ class DebugViewModel(ViewModel):
   def setUi(self, value):
     # type: (UiModel) -> None
     self._setViewModel(4, value)
+
+  def getVisible(self):
+    # type: () -> bool
+    return self._getBool(5)
+  
+  def setVisible(self, value):
+    # type: (bool) -> None
+    self._setBool(5, value)
   
   @staticmethod
   def getMarkersType():

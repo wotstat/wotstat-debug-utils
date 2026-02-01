@@ -14,6 +14,7 @@ import type { ModelValue } from './utils/types'
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
 
 type Model = {
+  visible: boolean
   markers: Array<ModelValue<MarkerData>>
   lines: Array<ModelValue<SimpleLineData>>
   polyLines: Array<ModelValue<PolyLineData>>
@@ -31,6 +32,10 @@ const statisticsPanel = new StatisticsPanel({
   onDebugColorizedLinesChange: (value) => debugColorizedLines = value
 })
 panelController.addPanel(statisticsPanel)
+
+const model = new ReactiveModel<Model>()
+model.subscribe('model')
+model.watch(m => panel.setVisible(m?.visible ?? false), { immediate: true })
 
 const userPanelsController = new UserPanelsController(panelController)
 

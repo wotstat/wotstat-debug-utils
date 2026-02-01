@@ -1,3 +1,4 @@
+import { requestDoubleFrame, waitDoubleFrame } from '../../utils/requestDoubleFrame'
 import './styles.scss'
 
 const X_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_X_POSITION'
@@ -10,6 +11,7 @@ export class FloatingPanel {
 
   private dragDelta = { x: 0, y: 0 }
   private isDragging = false
+  private visible = false
 
   constructor(private readonly root: HTMLElement) {
     this.panel.classList.add('floating-panel')
@@ -19,6 +21,7 @@ export class FloatingPanel {
     const panelHoverHeader = document.createElement('div')
     panelHoverHeader.classList.add('floating-panel-hover-header')
     this.panel.appendChild(panelHoverHeader)
+    this.panel.style.display = 'none'
     panelHoverHeader.textContent = 'WotStat Debug Utils'
 
     const observer = new ResizeObserver((entries) => {
@@ -37,6 +40,8 @@ export class FloatingPanel {
 
     document.body.appendChild(this.debugClickArea)
     this.debugClickArea.classList.add('floating-panel-debug-click-area')
+
+    requestDoubleFrame(() => this.updatePaddingsCurrentSize())
   }
 
   private onPointerUp = (e: MouseEvent) => {
@@ -47,7 +52,7 @@ export class FloatingPanel {
     this.isDragging = false
 
     const { height, width } = viewEnv.getClientSizePx()
-    requestAnimationFrame(() => requestAnimationFrame(() => this.updatePaddings(height, width)))
+    requestDoubleFrame(() => this.updatePaddings(height, width))
 
     localStorage.setItem(X_POSITION_KEY, this.panel.style.left)
     localStorage.setItem(Y_POSITION_KEY, this.panel.style.top)
@@ -80,7 +85,17 @@ export class FloatingPanel {
     this.panel.style.top = `${targetY}px`
   }
 
+  private updatePaddingsCurrentSize() {
+    const { height, width } = viewEnv.getClientSizePx()
+    this.updatePaddings(height, width)
+  }
+
   private updatePaddings(height: number, width: number) {
+    if (!this.visible) {
+      viewEnv.setHitAreaPaddingsRem(viewEnv.pxToRem(height), 0, 0, 0, 15)
+      return
+    }
+
     const rect = this.panel.getBoundingClientRect()
 
     const top = rect.top
@@ -103,6 +118,54 @@ export class FloatingPanel {
   public onScreenResize(height: number, width: number) {
     if (this.isDragging) return
     this.updatePaddings(height, width)
+  }
+
+  private async animationIn(callback: () => void = () => { }) {
+    this.panel.classList.add('animation-in', 'animation-start')
+
+    await waitDoubleFrame()
+    if (!this.visible) return this.panel.classList.remove('animation-in', 'animation-start')
+
+    this.panel.classList.remove('animation-start')
+    this.panel.classList.add('animation-end')
+
+    await new Promise(resolve => setTimeout(resolve, 300))
+    if (!this.visible) return this.panel.classList.remove('animation-in', 'animation-end')
+
+    this.panel.classList.remove('animation-in', 'animation-end')
+
+    callback()
+  }
+
+  private async animationOut(callback: () => void = () => { }) {
+    this.panel.classList.add('animation-out', 'animation-start')
+
+    await waitDoubleFrame()
+    if (this.visible) return this.panel.classList.remove('animation-out', 'animation-start')
+
+    this.panel.classList.remove('animation-start')
+    this.panel.classList.add('animation-end')
+
+    await new Promise(resolve => setTimeout(resolve, 300))
+    if (this.visible) return this.panel.classList.remove('animation-out', 'animation-end')
+
+    this.panel.classList.remove('animation-out', 'animation-end')
+
+    callback()
+  }
+
+  public setVisible(visible: boolean) {
+    if (this.visible === visible) return
+
+    this.visible = visible
+    if (visible) {
+      this.panel.style.display = ''
+      this.animationIn(() => this.updatePaddingsCurrentSize())
+    } else {
+      this.animationOut(() => this.panel.style.display = 'none')
+    }
+
+    this.updatePaddingsCurrentSize()
   }
 
 }

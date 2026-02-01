@@ -4,7 +4,6 @@ from account_helpers.settings_core.options import MouseSetting
 import BigWorld, game
 from aih_constants import CTRL_MODE_NAME
 from Event import SafeEvent
-from gui.shared.personality import onAccountBecomePlayer
 from PlayerEvents import g_playerEvents
 
 from .FreeCamera import WotstatFreeCameraController, WotstatFreeCameraHangarController
@@ -26,10 +25,8 @@ class FreeCameraUtils(object):
     self.panel = ui.createPanel('Free Camera')
     self.enabledCheckbox = self.panel.addCheckboxLine('Enable', False, self.onEnableChanged)
     self.panel.addHeaderLine('CONTROLS')
-    self.panel.addTextLine('WASD – move')
-    self.panel.addTextLine('Space/Shift – Up/Down')
-    self.panel.addTextLine('Z – zoom')
-    self.panel.addTextLine('1-9 – Set speed')
+    self.panel.addTextLine('WASD/Space/Shift – Move/Up/Down')
+    self.panel.addTextLine('Z – zoom, 1-9 – set speed')
 
     onSetCameraSettings += self.onSetCameraSettings
     self.gameCameraController = WotstatFreeCameraController()

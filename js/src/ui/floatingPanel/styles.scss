@@ -30,7 +30,34 @@
   &:hover .floating-panel-hover-header {
     opacity: 1;
     transform: translateY(0);
+  }
 
+  &.animation-in {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &.animation-start {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    &.animation-end {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &.animation-out {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &.animation-start {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    &.animation-end {
+      opacity: 0;
+      transform: scale(0.97);
+    }
   }
 }
 
