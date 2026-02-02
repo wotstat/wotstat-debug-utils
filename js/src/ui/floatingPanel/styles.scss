@@ -1,15 +1,14 @@
-
 .floating-panel {
   position: absolute;
 
   top: 50rem;
   left: 50rem;
-  
+
   border-radius: 10rem;
   background-color: #181818;
   border: 1rem solid #545454;
   box-shadow: 0rem 4rem 16rem rgba(0, 0, 0, 0.6);
-  pointer-events: all;
+  pointer-events: auto;
   cursor: pointer;
 
   .floating-panel-hover-header {
@@ -27,9 +26,13 @@
     text-shadow: 0 0 10rem rgba(0, 0, 0, 1), 0 0 4rem rgba(0, 0, 0, 1);
   }
 
-  &:hover .floating-panel-hover-header {
-    opacity: 1;
-    transform: translateY(0);
+  &:hover {
+    background-color: #181818;
+
+    .floating-panel-hover-header {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   &.animation-in {

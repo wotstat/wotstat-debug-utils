@@ -10,6 +10,7 @@ import { UserPanelsController } from './ui/panels/panelController/UserPanelsCont
 import { StatisticsPanel } from './ui/panels/StatisticsPanel'
 import { ReactiveModel } from './utils/ReactiveModel'
 import type { ModelValue } from './utils/types'
+import './utils/ResizeObserverPolyfill'
 
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
 

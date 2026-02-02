@@ -4,6 +4,14 @@ import './styles.scss'
 const X_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_X_POSITION'
 const Y_POSITION_KEY = 'WOTSTAT_DEBUG_UTILS_FLOATING_PANEL_Y_POSITION'
 
+function addClass(element: HTMLElement, ...classes: string[]) {
+  classes.forEach(cls => element.classList.add(cls))
+}
+
+function removeClass(element: HTMLElement, ...classes: string[]) {
+  classes.forEach(cls => element.classList.remove(cls))
+}
+
 export class FloatingPanel {
 
   public readonly panel = document.createElement('div')
@@ -26,6 +34,8 @@ export class FloatingPanel {
 
     const observer = new ResizeObserver((entries) => {
       if (entries.length === 0) return
+      if (!this.visible) return
+      if (this.isDragging) return
       const { height, width } = viewEnv.getClientSizePx()
       this.updatePaddings(height, width)
     })
@@ -121,35 +131,34 @@ export class FloatingPanel {
   }
 
   private async animationIn(callback: () => void = () => { }) {
-    this.panel.classList.add('animation-in', 'animation-start')
+    addClass(this.panel, 'animation-in', 'animation-start')
 
     await waitDoubleFrame()
-    if (!this.visible) return this.panel.classList.remove('animation-in', 'animation-start')
+    if (!this.visible) return removeClass(this.panel, 'animation-in', 'animation-start')
 
-    this.panel.classList.remove('animation-start')
-    this.panel.classList.add('animation-end')
+    removeClass(this.panel, 'animation-start')
+    addClass(this.panel, 'animation-end')
 
     await new Promise(resolve => setTimeout(resolve, 300))
-    if (!this.visible) return this.panel.classList.remove('animation-in', 'animation-end')
+    if (!this.visible) return removeClass(this.panel, 'animation-in', 'animation-end')
 
-    this.panel.classList.remove('animation-in', 'animation-end')
+    removeClass(this.panel, 'animation-in', 'animation-end')
 
     callback()
   }
 
   private async animationOut(callback: () => void = () => { }) {
-    this.panel.classList.add('animation-out', 'animation-start')
+    addClass(this.panel, 'animation-out', 'animation-start')
 
     await waitDoubleFrame()
-    if (this.visible) return this.panel.classList.remove('animation-out', 'animation-start')
+    if (this.visible) return removeClass(this.panel, 'animation-out', 'animation-start')
 
-    this.panel.classList.remove('animation-start')
-    this.panel.classList.add('animation-end')
+    removeClass(this.panel, 'animation-start')
+    addClass(this.panel, 'animation-end')
 
     await new Promise(resolve => setTimeout(resolve, 300))
-    if (this.visible) return this.panel.classList.remove('animation-out', 'animation-end')
-
-    this.panel.classList.remove('animation-out', 'animation-end')
+    if (this.visible) return removeClass(this.panel, 'animation-out', 'animation-end')
+    removeClass(this.panel, 'animation-out', 'animation-end')
 
     callback()
   }

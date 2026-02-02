@@ -1,7 +1,5 @@
 .user-panel-number-input-line-container {
-  .user-panel-number-input-line-label {
-    
-  }
+  .user-panel-number-input-line-label {}
 
   .user-panel-number-input-line-stepper {
     display: flex;
@@ -13,7 +11,7 @@
   .user-panel-number-input-line-stepper-plus,
   .user-panel-number-input-line-stepper-minus,
   .user-panel-number-input-line-value {
-    pointer-events: all;
+    pointer-events: auto;
     color: rgb(238, 238, 238);
     border-radius: 2rem;
     background-color: #ffffff21;
@@ -21,7 +19,7 @@
     transition: background-color 0.2s ease;
     height: 14rem;
 
-    font-family: PFDINMax;
+    font-family: PFDINMax, "Warhelios", sans-serif;
     font-weight: 400;
 
     &:hover {
@@ -54,7 +52,7 @@
     letter-spacing: 0.02em;
     text-align: center;
 
-    &::selection{
+    &::selection {
       background-color: #949494;
       color: #151515;
     }

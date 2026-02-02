@@ -7,10 +7,8 @@
     border: none;
     border-radius: 2rem;
     background-color: #ffffff21;
-    pointer-events: all;
+    pointer-events: auto;
     transition: background-color 0.2s ease;
-    height: 12rem;
-    width: 12rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,14 +18,20 @@
       background-color: #ffffff3b;
     }
 
-    svg {
+    .user-panel-checkbox-line-checkmark {
       height: 11rem;
       width: 11rem;
-      pointer-events: none;
-      visibility: hidden;
+      margin: 0.5rem;
       
-      g {
-        fill: #d8d8d8;
+      svg {
+        height: 100%;
+        width: 100%;
+        pointer-events: none;
+        visibility: hidden;
+        
+        g {
+          fill: #d8d8d8;
+        }
       }
     }
 

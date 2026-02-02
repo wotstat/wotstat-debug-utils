@@ -7,17 +7,51 @@ from gui.debugUtils import ui, gizmos, NiceColors
 from helpers import dependency
 from skeletons.gui.shared.utils import IHangarSpace
 from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
-from shared_utils.vehicle_utils import getMatinfo
+
 from Vehicle import SegmentCollisionResultExt
 from ProjectileMover import EntityCollisionData
+
+try: 
+  from shared_utils.vehicle_utils import getMatinfo
+except ImportError:
+  from vehicle_systems.tankStructure import TankPartIndexes
+  from vehicle_systems.model_assembler import collisionIdxToTrackPairIdx
+  from items import vehicles
+
+  def getMatinfo(vehicleEntity, partIndex, matKind, isWheeledVehicle):
+    typeDescriptor = vehicleEntity.typeDescriptor
+    collisionComponent = vehicleEntity.appearance.collisions
+
+    matInfo = None
+    if partIndex == TankPartIndexes.CHASSIS:
+      matInfo = typeDescriptor.chassis.materials.get(matKind)
+    elif partIndex == TankPartIndexes.HULL:
+      matInfo = typeDescriptor.hull.materials.get(matKind)
+    elif partIndex == TankPartIndexes.TURRET:
+      matInfo = typeDescriptor.turret.materials.get(matKind)
+    elif partIndex == TankPartIndexes.GUN:
+      matInfo = typeDescriptor.gun.materials.get(matKind)
+    elif partIndex > len(TankPartIndexes.ALL):
+      trackPairIdx = collisionIdxToTrackPairIdx(partIndex, typeDescriptor)
+      if trackPairIdx is not None:
+        matInfo = typeDescriptor.chassis.tracks[trackPairIdx].materials.get(matKind)
+    elif isWheeledVehicle and collisionComponent is not None:
+      wheelName = collisionComponent.getPartName(partIndex)
+      if wheelName is not None:
+        matInfo = typeDescriptor.chassis.wheelsArmor.get(wheelName, None)
+    if matInfo is None:
+      commonMaterialsInfo = vehicles.g_cache.commonConfig['materials']
+      matInfo = commonMaterialsInfo.get(matKind)
+    return matInfo
+
 import typing
 if typing.TYPE_CHECKING:
   from ...gizmos.PolyLine import PolyLine
   from ...gizmos.Marker import Marker
   from ...ui.models.UiModel import Panel
 
-
-# collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegment') else BigWorld.collideSegment
+collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegment') else BigWorld.collideSegment
+collideDynamicStatic = BigWorld.wg_collideDynamicStatic if hasattr(BigWorld, 'wg_collideDynamicStatic') else BigWorld.collideDynamicStatic
 class RaycastUtil(object):
   hangarSpace = dependency.descriptor(IHangarSpace)
   
@@ -91,11 +125,12 @@ class RaycastUtil(object):
         if not hits: continue
         for dist, hitAngleCos, matKind, parIndex in hits:
           matInfo = getMatinfo(entity, parIndex, matKind, entity.typeDescriptor.type.isWheeledVehicle)
+          if matInfo is None: continue
           segments.append((startPoint + ray * dist, collision, SegmentCollisionResultExt(dist, hitAngleCos, matInfo, parIndex)))
           
       currentPoint = startPoint
       for _ in range(40):
-        res = BigWorld.wg_collideSegment(spaceID, currentPoint, endPoint)
+        res = collideSegment(spaceID, currentPoint, endPoint)
         if res is None: break
         segments.append((res.closestPoint, None, None))
         currentPoint = res.closestPoint + ray * 0.01
@@ -105,7 +140,7 @@ class RaycastUtil(object):
       
       for _ in range(40):
         collisionFlags=128
-        res = BigWorld.wg_collideDynamicStatic(spaceID, currentPoint, endPoint, collisionFlags, -1, 0, 0)
+        res = collideDynamicStatic(spaceID, currentPoint, endPoint, collisionFlags, -1, 0, 0)
         
         if res is None: break
         

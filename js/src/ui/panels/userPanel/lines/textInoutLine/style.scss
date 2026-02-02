@@ -1,10 +1,8 @@
 .user-panel-text-input-line-container {
-  .user-panel-text-input-line-label {
-    
-  }
+  .user-panel-text-input-line-label {}
 
   .user-panel-text-input-line-value {
-    pointer-events: all;
+    pointer-events: auto;
     color: rgb(238, 238, 238);
     cursor: text;
     border-radius: 2rem;
@@ -17,7 +15,7 @@
     line-height: 1;
     padding-left: 2rem;
 
-    font-family: PFDINMax;
+    font-family: PFDINMax, "Warhelios", sans-serif;
     font-weight: 400;
     letter-spacing: 0.02em;
 
@@ -25,7 +23,7 @@
       background-color: #ffffff3b;
     }
 
-    &::selection{
+    &::selection {
       background-color: #949494;
       color: #151515;
     }

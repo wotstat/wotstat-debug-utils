@@ -1,20 +1,12 @@
-import BigWorld, GUI, Math, math
-import Keys
-from gui import InputHandler
-from AvatarInputHandler import cameras
+import BigWorld
 from gui.debugUtils import ui, gizmos, NiceColors, LineEnd
 
 from helpers import dependency
 from skeletons.gui.shared.utils import IHangarSpace
-from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
-from shared_utils.vehicle_utils import getMatinfo
 from Vehicle import Vehicle
 from Event import SafeEvent
-from ProjectileMover import EntityCollisionData
 import typing
 if typing.TYPE_CHECKING:
-  from ...gizmos.PolyLine import PolyLine
-  from ...gizmos.Marker import Marker
   from ...ui.models.UiModel import Panel
 
 
@@ -27,7 +19,6 @@ def onStaticCollision(*a, **k):
 Vehicle.onStaticCollision = onStaticCollision
 
 
-# collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegment') else BigWorld.collideSegment
 class PhysicsUtil(object):
   hangarSpace = dependency.descriptor(IHangarSpace)
   

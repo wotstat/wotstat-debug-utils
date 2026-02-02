@@ -1,4 +1,3 @@
-
 .panel-controller {
   padding: 5rem;
   width: 190rem;
@@ -22,7 +21,7 @@
       .panel-header-title {
         user-select: none;
         margin-top: -2rem;
-        flex-grow: 1;
+        flex: 1;
       }
 
       .panel-header-content-container {
@@ -52,8 +51,9 @@
         justify-content: center;
 
         svg {
-          width: 10rem;
-          height: 10rem;
+          width: 70%;
+          height: 70%;
+          font-size: 1px;
           fill: #d8d8d8;
           transition: transform 0.2s ease, fill 0.2s ease;
         }
@@ -109,6 +109,7 @@
           }
         }
       }
+
       .panel-content {
         display: none;
       }
