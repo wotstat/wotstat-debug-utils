@@ -1,7 +1,10 @@
+import BigWorld
+import Keys
+import game
+from BattleReplay import BattleReplay, g_replayCtrl
 from AvatarInputHandler import AvatarInputHandler
 from gui.debugUtils import ui
 from account_helpers.settings_core.options import MouseSetting
-import BigWorld, game
 from aih_constants import CTRL_MODE_NAME
 from Event import SafeEvent
 from PlayerEvents import g_playerEvents
@@ -15,6 +18,7 @@ if typing.TYPE_CHECKING:
 
 onSetCameraSettings = SafeEvent()
 keyListeners = set() # type: Set[Callable[[BigWorld.KeyEvent], bool]]
+replayKeyListeners = set() # type: Set[Callable[[BigWorld.KeyEvent], bool]]
 mouseListeners = set() # type: Set[Callable[[BigWorld.MouseEvent], bool]]
 
 class FreeCameraUtils(object):
@@ -53,6 +57,14 @@ class FreeCameraUtils(object):
         return True
     return False
   
+  def handleReplayKeyEvent(self, isDown, key, mods, isRepeat, event):
+    if not g_replayCtrl.isPlaying: return False
+    if key != Keys.KEY_SPACE: return False
+    if self.enabled and self.activeController is self.gameCameraController:
+      if self.gameCameraController.handleKeyEvent(isDown, key, mods, event):
+        return True
+    return False
+  
   def handleMouseEvent(self, event):
     # type: (BigWorld.MouseEvent) -> bool
     if self.enabled and self.activeController is self.hangarCameraController:
@@ -74,10 +86,12 @@ class FreeCameraUtils(object):
       inputHandler._AvatarInputHandler__ctrls[CTRL_MODE_NAME.VIDEO] = self.gameCameraController
       inputHandler.onControlModeChanged(CTRL_MODE_NAME.VIDEO)
       self.activeController = self.gameCameraController
+      if g_replayCtrl.isPlaying: replayKeyListeners.add(self.handleReplayKeyEvent)
     else:
       inputHandler._AvatarInputHandler__ctrls[CTRL_MODE_NAME.VIDEO] = self.oldGameCameraVideoController
       inputHandler.onControlModeChanged(CTRL_MODE_NAME.ARCADE)
       self.activeController = None
+      if g_replayCtrl.isPlaying: replayKeyListeners.discard(self.handleReplayKeyEvent)
 
   def enableHangarCamera(self, enable):
     self.enabledCheckbox.isChecked = enable
@@ -132,3 +146,11 @@ def handleMouseEvent(event):
       return True
   return oldHandleMouse(event)
 game.handleMouseEvent = handleMouseEvent
+
+oldBattleReplayHandleKeyEvent = BattleReplay.handleKeyEvent
+def battleHandleKeyEvent(obj, isDown, key, mods, isRepeat, event):
+  for listener in replayKeyListeners:
+    if listener(isDown, key, mods, isRepeat, event):
+      return True
+  return oldBattleReplayHandleKeyEvent(obj, isDown, key, mods, isRepeat, event)
+BattleReplay.handleKeyEvent = battleHandleKeyEvent

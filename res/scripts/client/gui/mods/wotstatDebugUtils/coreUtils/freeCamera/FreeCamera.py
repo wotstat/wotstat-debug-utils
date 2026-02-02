@@ -16,7 +16,7 @@ from skeletons.gui.shared.utils import IHangarSpace
 from gui.hangar_cameras.hangar_camera_common import CameraMovementStates
 from Event import SafeEvent
 import ResMgr
-from helpers import isPlayerAvatar, isPlayerAccount
+from helpers import isPlayerAccount
 
 @staticmethod
 def clampFov(fov): return math_utils.clamp(0.0001, 3.12, fov)
