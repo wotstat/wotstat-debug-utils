@@ -2,7 +2,7 @@ import BigWorld, GUI, Math, math
 import Keys
 from gui import InputHandler
 from AvatarInputHandler import cameras
-from gui.debugUtils import ui, gizmos, NiceColors
+from gui.debugUtils import ui, gizmos, drawer, NiceColors, NiceColorsHex
 
 from helpers import dependency
 from skeletons.gui.shared.utils import IHangarSpace
@@ -59,9 +59,11 @@ class RaycastUtil(object):
     # type: (Panel) -> None
     self.panel = panel
     self.showMatInfo = False
+    self.lineIs3D = False
     self.header = self.panel.addHeaderLine('Raycast')
     self.raycastLine = self.panel.addCheckboxLine('Raycast line (MMB)', onToggleCallback=self.onRaycastToggle)
     self.raycastMatInfo = self.panel.addCheckboxLine('  Mat info', onToggleCallback=self.onMatInfoToggle)
+    self.raycast3DLine = self.panel.addCheckboxLine('  Line 3D', onToggleCallback=self.on3DLineToggle)
     self.lines = [] # type: list[PolyLine]
     self.markers = [] # type: list[Marker]
     
@@ -73,9 +75,14 @@ class RaycastUtil(object):
     self.clear()
     self.panel.removeLine(self.raycastLine)
     self.panel.removeLine(self.raycastMatInfo)
+    self.panel.removeLine(self.raycast3DLine)
 
   def onMatInfoToggle(self, value):
     self.showMatInfo = value
+    self.render()
+
+  def on3DLineToggle(self, value):
+    self.lineIs3D = value
     self.render()
 
   def onRaycastToggle(self, value):
@@ -170,33 +177,43 @@ class RaycastUtil(object):
     segments = self.lastSegments
     startPoint = self.lastStartPoint
     endPoint = self.lastEndPoint
+
+
+    if self.lineIs3D:
+      if len(segments) == 0:
+        "#E0C4C3"
+        self.lines.append(drawer.createLine(color=NiceColorsHex.RED, backColor=0xE0C4C3, p1=startPoint, p2=endPoint))
+      else:
+        "#757C77"
+        self.lines.append(drawer.createLine(color=NiceColorsHex.GREEN, backColor=0x757C77, p1=startPoint, p2=endPoint))
+    else:
+      farthestPoint = None
+      farthestDist = 0
+      
+      for pos, collision, seg in segments:
+        dist = (pos - startPoint).length
+        if dist > farthestDist:
+          farthestDist = dist
+          farthestPoint = pos
+      
+      lastPoint = startPoint
+      for pos, _, _ in segments:
+        if (lastPoint - pos).length < 0.01: continue
+        # line = drawer.createLine(color=NiceColors.GREEN if pos == farthestPoint else NiceColors.RED, p1=lastPoint, p2=pos, width=1)
+        line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN if farthestPoint else NiceColors.RED)
+        line.fromAutoSegments(lastPoint, pos)
+        self.lines.append(line)
+        lastPoint = pos
         
-    farthestPoint = None
-    farthestDist = 0
-    
-    for pos, collision, seg in segments:
-      dist = (pos - startPoint).length
-      if dist > farthestDist:
-        farthestDist = dist
-        farthestPoint = pos
-    
-    lastPoint = startPoint
-    for pos, _, _ in segments:
-      if (lastPoint - pos).length < 0.01: continue
-      line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN if farthestPoint else NiceColors.RED)
-      line.fromAutoSegments(lastPoint, pos)
-      self.lines.append(line)
-      lastPoint = pos
-      
-    if len(segments) > 0 and segments[-1][2] is not None and (lastPoint - endPoint).length < 0.01:
-      line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN)
-      line.fromAutoSegments(lastPoint, endPoint)
-      self.lines.append(line)
-      
-    if len(segments) == 0:
-      line = gizmos.createPolyLine(width=1, color=NiceColors.RED)
-      line.fromAutoSegments(startPoint, endPoint)
-      self.lines.append(line)
+      if len(segments) > 0 and segments[-1][2] is not None and (lastPoint - endPoint).length < 0.01:
+        line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN)
+        line.fromAutoSegments(lastPoint, endPoint)
+        self.lines.append(line)
+        
+      if len(segments) == 0:
+        line = gizmos.createPolyLine(width=1, color=NiceColors.RED)
+        line.fromAutoSegments(startPoint, endPoint)
+        self.lines.append(line)
         
     for pos, collision, seg in segments:
       if seg:

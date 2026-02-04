@@ -171,7 +171,7 @@ class WotstatFreeCamera(ICamera, CallbackDelayer, TimeDeltaMeter):
   def getHorizontalVelocityDelta(self, dt):
     m = math_utils.createRotationMatrix(self.ypr)
 
-    forward = m.applyVector(Math.Vector3(0, 0, 1))
+    forward = m.applyVector(Math.Vector3(0, 0, 1) if abs(self.ypr[1]) < math.pi / 4 else Math.Vector3(0, 1 if self.ypr[1] > 0 else -1, 0))
     forward.y = 0
     forward.normalise()
 
@@ -221,7 +221,7 @@ class WotstatFreeCamera(ICamera, CallbackDelayer, TimeDeltaMeter):
       return velocity + deltaVelocity
 
   def clampYPR(self, ypr):
-    return Math.Vector3(math.fmod(ypr[0], 2 * math.pi), max(-0.9 * math.pi / 2, min(0.9 * math.pi / 2, ypr[1])), math.fmod(ypr[2], 2 * math.pi))
+    return Math.Vector3(math.fmod(ypr[0], 2 * math.pi), max(-math.pi / 2, min(math.pi / 2, ypr[1])), math.fmod(ypr[2], 2 * math.pi))
 
 class WotstatFreeCameraController(IControlMode):
 
