@@ -15,6 +15,13 @@
     "wot-src/_stubs",
     "BigWorldPlaceholder",
   ],
+  "python.analysis.exclude": [
+    "build/**",
+    "js/**",
+    "**/node_modules",
+    "**/.*",
+    "**/__pycache__",
+  ],
   "python.analysis.userFileIndexingLimit": 20000,
   "cSpell.language": "en,ru",
   "editor.codeActionsOnSave": {

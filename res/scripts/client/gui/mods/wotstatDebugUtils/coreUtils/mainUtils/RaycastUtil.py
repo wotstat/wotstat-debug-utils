@@ -1,10 +1,12 @@
 import BigWorld, GUI, Math, math
 import Keys
+import time
 from gui import InputHandler
 from AvatarInputHandler import cameras
 from gui.debugUtils import ui, gizmos, drawer, NiceColors, NiceColorsHex
+from helpers.CallbackDelayer import CallbackDelayer
 
-from helpers import dependency
+from helpers import dependency, isPlayerAvatar
 from skeletons.gui.shared.utils import IHangarSpace
 from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
 
@@ -52,15 +54,28 @@ if typing.TYPE_CHECKING:
 
 collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegment') else BigWorld.collideSegment
 collideDynamicStatic = BigWorld.wg_collideDynamicStatic if hasattr(BigWorld, 'wg_collideDynamicStatic') else BigWorld.collideDynamicStatic
-class RaycastUtil(object):
+
+
+def round(x, digits=0):
+  if digits == 0:
+    return int(x + 0.5)
+  else:
+    mult = 10 ** digits
+    return float(int(x * mult + 0.5)) / mult
+
+class RaycastUtil(CallbackDelayer):
   hangarSpace = dependency.descriptor(IHangarSpace)
   
   def __init__(self, panel):
     # type: (Panel) -> None
+
+    CallbackDelayer.__init__(self)
+
     self.panel = panel
     self.showMatInfo = False
     self.lineIs3D = False
     self.header = self.panel.addHeaderLine('Raycast')
+    self.distanceLine = self.panel.addValueLine('Cursor distance', value='0')
     self.raycastLine = self.panel.addCheckboxLine('Raycast line (MMB)', onToggleCallback=self.onRaycastToggle)
     self.raycastMatInfo = self.panel.addCheckboxLine('  Mat info', onToggleCallback=self.onMatInfoToggle)
     self.raycast3DLine = self.panel.addCheckboxLine('  Line 3D', onToggleCallback=self.on3DLineToggle)
@@ -70,12 +85,57 @@ class RaycastUtil(object):
     self.lastSegments = None # type: typing.Optional[typing.List[typing.Tuple[Math.Vector3, any, SegmentCollisionResultExt]]]
     self.lastStartPoint = None # type: typing.Optional[Math.Vector3]
     self.lastEndPoint = None # type: typing.Optional[Math.Vector3]
+
+    self.lastDistanceUpdateTime = 0
+    self.delayCallback(0, self.update)
     
   def dispose(self):
     self.clear()
     self.panel.removeLine(self.raycastLine)
     self.panel.removeLine(self.raycastMatInfo)
     self.panel.removeLine(self.raycast3DLine)
+
+  def update(self):
+    if self.lastDistanceUpdateTime + 0.1 > time.time(): return 0.0
+    self.lastDistanceUpdateTime = time.time()
+
+    cursorPosition = GUI.mcursor().position
+    ray, wpoint = cameras.getWorldRayAndPoint(cursorPosition.x, cursorPosition.y)
+    ray.normalise()
+    
+    startPoint = wpoint
+    endPoint = wpoint + ray * 3000
+
+    spaceId = None
+    if self.hangarSpace and self.hangarSpace.spaceID is not None:
+      spaceId = self.hangarSpace.spaceID
+    elif isPlayerAvatar():
+      spaceId = BigWorld.player().spaceID
+
+    if spaceId is None:
+      self.distanceLine.value = '-'
+      return 0.0
+
+    res = None
+    for _ in range(40):
+      res = collideDynamicStatic(spaceId, startPoint, endPoint, 128, -1, 0, 0)
+      if res is None: break
+
+      if isPlayerAvatar():
+        vehicle = BigWorld.player().vehicle
+        if vehicle is not None and res[1] and res[2] == vehicle.id:
+          startPoint = res[0] + ray * 0.01
+          continue
+
+      break
+
+    if res is not None:
+      dist = (res[0] - startPoint).length
+      self.distanceLine.value = str(round(dist, 2)) + 'm'
+    else:
+      self.distanceLine.value = '-'
+
+    return 0.0
 
   def onMatInfoToggle(self, value):
     self.showMatInfo = value
@@ -216,15 +276,18 @@ class RaycastUtil(object):
         self.lines.append(line)
         
     for pos, collision, seg in segments:
+      dist = (pos - startPoint).length
       if seg:
         if not seg.matInfo: continue
         
         armorText = str(int(seg.matInfo.armor)) if int(seg.matInfo.armor) == seg.matInfo.armor else str(round(seg.matInfo.armor, 2))
         angleText = str(round(math.degrees(math.acos(seg.hitAngleCos)), 1))
         l = armorText + 'mm (' + angleText + '°)'
+        l += '\ndist: ' + str(round(dist, 2)) + 'm'
         
         if not self.showMatInfo: l = None
         
         self.markers.append(gizmos.createMarker(pos, size=5, text=l, color=NiceColors.GREEN))
       else:
-        self.markers.append(gizmos.createMarker(pos, size=5, color=NiceColors.GREEN))
+        l = str(round(dist, 2)) + 'm' if self.showMatInfo else None
+        self.markers.append(gizmos.createMarker(pos, size=5, text=l, color=NiceColors.GREEN))

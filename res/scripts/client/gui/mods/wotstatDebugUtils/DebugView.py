@@ -56,6 +56,8 @@ class DebugView(ViewImpl):
     if event.key == Keys.KEY_F2:
       self.visible = not self.visible
       self.viewModel.setVisible(self.visible)
+      return True
+    return False
 
   def createMarker(self):
     return self.pointMarkersManager.create()

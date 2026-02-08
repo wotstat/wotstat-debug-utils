@@ -27,26 +27,32 @@ class LineModel:
     elif self.points is not None:
       line.points(self.points)
 
-  def render(self, dd):
+  def __backRender(self, dd):
+    # type: (DebugDrawer) -> None
+    line = dd.line() # type: Line
+
+    if self.width is not None: line.width(self.width)
+    if self.backColor is not None: line.colour(self.backColor)
+    line.zTest(False)
+    line.zWrite(False)
+
+    self.__setRenderPoints(line)
+
+  def __frontRender(self, dd):
     # type: (DebugDrawer) -> None
     line = dd.line() # type: Line
 
     if self.width is not None: line.width(self.width)
     if self.color is not None: line.colour(self.color)
-
-    if self.backColor is None:
-      if self.zTest is not None: line.zTest(self.zTest)
-      if self.zWrite is not None: line.zWrite(self.zWrite)
+    if self.zTest is not None and self.backColor is None: line.zTest(self.zTest)
+    if self.zWrite is not None and self.backColor is None: line.zWrite(self.zWrite)
 
     self.__setRenderPoints(line)
 
-    if self.backColor is not None:
-      lineBack = dd.line() # type: Line
-      if self.width is not None: lineBack.width(self.width)
-      lineBack.colour(self.backColor)
-      lineBack.zTest(False)
-      lineBack.zWrite(False)
-      self.__setRenderPoints(lineBack)
+  def render(self, dd):
+    # type: (DebugDrawer) -> None
+    if self.backColor is not None: self.__backRender(dd)
+    self.__frontRender(dd)
 
   def destroy(self):
     self.__controller.removeLine(self)
@@ -74,7 +80,7 @@ class SphereModel:
     elif isinstance(self.radius, Vector3):
       sphere.scale(self.radius)
 
-  def render(self, dd):
+  def __frontRender(self, dd):
     # type: (DebugDrawer) -> None
     sphere = dd.sphere() # type: Sphere
 
@@ -83,18 +89,25 @@ class SphereModel:
     if self.color is not None: sphere.colour(self.color)
     if self.wireframe is not None: sphere.wireframe(self.wireframe)
     if self.transparent: sphere.blendMode(BM_TRANSPARENT)
+    if self.zTest is not None and self.backColor is None: sphere.zTest(self.zTest)
+    if self.zWrite is not None and self.backColor is None: sphere.zWrite(self.zWrite)
 
-    if self.backColor is None:
-      if self.zTest is not None: sphere.zTest(self.zTest)
-      if self.zWrite is not None: sphere.zWrite(self.zWrite)
+  def __backRender(self, dd):
+    # type: (DebugDrawer) -> None
+    if self.backColor is None: return
 
-    if self.backColor is not None:
-      sphereBack = dd.sphere() # type: Sphere
-      if self.position is not None: sphereBack.position(self.position)
-      if self.radius is not None: self.__setRadius(sphereBack)
-      sphereBack.colour(self.backColor)
-      sphereBack.zTest(False)
-      sphereBack.zWrite(False)
+    sphere = dd.sphere() # type: Sphere
+
+    if self.position is not None: sphere.position(self.position)
+    if self.radius is not None: self.__setRadius(sphere)
+    sphere.colour(self.backColor)
+    sphere.zTest(False)
+    sphere.zWrite(False)
+
+  def render(self, dd):
+    # type: (DebugDrawer) -> None
+    if self.backColor is not None: self.__backRender(dd)
+    self.__frontRender(dd)
 
   def destroy(self):
     self.__controller.removeSphere(self)

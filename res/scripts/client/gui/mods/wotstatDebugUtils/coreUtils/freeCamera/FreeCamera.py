@@ -52,6 +52,7 @@ class WotstatFreeCamera(ICamera, CallbackDelayer, TimeDeltaMeter):
     CallbackDelayer.__init__(self)
     TimeDeltaMeter.__init__(self, time.clock)
 
+    self.aimingSystem = None
     self.pressedKeys = set() # type: set[int]
 
     self.camera = BigWorld.FreeCamera() # type: BigWorld.FreeCamera
