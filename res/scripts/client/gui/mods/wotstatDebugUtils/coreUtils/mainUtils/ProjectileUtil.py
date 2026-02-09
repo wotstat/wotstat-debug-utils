@@ -105,12 +105,19 @@ class Shot(object):
     self.ricochetTrajectory = ProjectileTrajectory(self.projectileUtil, startPoint, startVelocity, acceleration, shotStartTime=self.startTime)
 
   def addEndPoint(self, position):
-    time = BigWorld.time() - self.startTime
-    self.markers.append(gizmos.createMarker(position=position, color=NiceColors.GREEN, size=3.0, text='End %.3fs' % time))
+    self.addEndMarker(position, 'Hit')
 
   def addExplosion(self, position):
-    time = BigWorld.time() - self.startTime
-    self.markers.append(gizmos.createMarker(position=position, color=NiceColors.GREEN, size=3.0, text='Explosion %.3fs' % time))
+    self.addEndMarker(position, 'Explosion')
+
+  def addEndMarker(self, position, kind):
+    addedTime = BigWorld.time() - self.startTime
+    pos = self.__assignTrajectoryEnd(position)
+    if pos:
+      time, distance = pos
+      self.markers.append(gizmos.createMarker(position=position, color=NiceColors.GREEN, size=3.0, text='%s %.1fm/%.3fs (%.3fs)' % (kind, distance, time, addedTime)))
+    else:
+      self.markers.append(gizmos.createMarker(position=position, color=NiceColors.RED, size=3.0, text='%s (%.3fs)' % (kind, addedTime)))
 
   def dispose(self):
     if self.trajectory is not None:
@@ -123,7 +130,7 @@ class Shot(object):
 
     for marker in self.markers:
       marker.destroy()
-    self.markers.clear()
+    self.markers = []
 
   def update(self):
     if self.trajectory is not None:
@@ -131,7 +138,30 @@ class Shot(object):
 
     if self.ricochetTrajectory is not None:
       self.ricochetTrajectory.update()
-  
+
+  def __assignTrajectoryEnd(self, position):
+    bestTrajectory = None
+
+    trajectoryTime = self.trajectory.estimateTimeAtPoint(position) if self.trajectory is not None else None
+    ricochetTime = self.ricochetTrajectory.estimateTimeAtPoint(position) if self.ricochetTrajectory is not None else None
+
+    if not trajectoryTime and not ricochetTime:
+      return None
+
+    if trajectoryTime and not ricochetTime:
+      bestTrajectory = self.trajectory
+
+    elif ricochetTime and not trajectoryTime:
+      bestTrajectory = self.ricochetTrajectory
+
+    else:
+      bestTrajectory = self.ricochetTrajectory if self.trajectory.endPoint else self.trajectory
+
+    bestEstimate = trajectoryTime if bestTrajectory == self.trajectory else ricochetTime
+    if bestEstimate[1] > 0.5:
+      return None
+    
+    return bestTrajectory.setEnd(position, bestEstimate[0])
 
 class ProjectileTrajectory():
   def __init__(self, projectileUtil, startPoint, startVelocity, acceleration, shotStartTime=None):
@@ -143,6 +173,9 @@ class ProjectileTrajectory():
     self.startTime = BigWorld.time()
     self.shotStartTime = shotStartTime
     self.trajectoryLine = None # type: Line | LineModel | None
+    self.endTime = None
+    self.endPoint = None
+    self.endDistance = None
 
     self.marker = gizmos.createMarker(position=startPoint, color=NiceColors.GREEN, size=5.0)
     self.__setupTrajectoryLine()
@@ -152,7 +185,7 @@ class ProjectileTrajectory():
       self.trajectoryLine.destroy()
 
     if self.projectileUtil.trajectoryEnabled:
-      points = self.computeTrajectory()
+      points = self.computeTrajectory(duration=self.endTime)
       if self.projectileUtil.trajectoryLine3D:
         self.trajectoryLine = drawer.createLine(points=points, color=NiceColorsHex.GREEN, backColor=NiceColorsHex.YELLOW)
       else:
@@ -167,11 +200,56 @@ class ProjectileTrajectory():
       self.trajectoryLine.destroy()
       self.trajectoryLine = None
 
-  def computeTrajectory(self, distance=1000.0):
-    duration = estimateShotDuration(self.startVelocity, self.acceleration, distance)
+  def computeTrajectory(self, distance=1000.0, duration=None):
+    duration = estimateShotDuration(self.startVelocity, self.acceleration, distance) if duration is None else duration
     points = computeProjectileTrajectory(self.startPoint, self.startVelocity, self.acceleration, duration, SHELL_TRAJECTORY_EPSILON)
     points.insert(0, self.startPoint)
     return points
+
+  def estimateTimeAtPoint(self, point, maxTime=None, samples=40):
+    if maxTime is None:
+      dx = point.x - self.startPoint.x
+      dz = point.z - self.startPoint.z
+      horizontalDistance = math.sqrt(dx*dx + dz*dz)
+      maxTime = estimateShotDuration(self.startVelocity, self.acceleration, horizontalDistance)
+      if maxTime is None:
+        maxTime = self.projectileUtil.trajectoryDuration
+
+    if maxTime is None or maxTime <= 0.0:
+      return None, None
+
+    bestTime = 0.0
+    bestDistSq = None
+    step = maxTime / float(samples)
+    t = 0.0
+    for _ in range(samples + 1):
+      distSq = self.__distanceSquaredAtTime(point, t)
+      if bestDistSq is None or distSq < bestDistSq:
+        bestDistSq = distSq
+        bestTime = t
+      t += step
+
+    # local refinement around bestTime
+    window = step
+    for _ in range(6):
+      left = max(0.0, bestTime - window)
+      right = min(maxTime, bestTime + window)
+      for j in range(1, 5):
+        t = left + (right - left) * (j / 5.0)
+        distSq = self.__distanceSquaredAtTime(point, t)
+        if distSq < bestDistSq:
+          bestDistSq = distSq
+          bestTime = t
+      window *= 0.5
+
+    return bestTime, math.sqrt(bestDistSq) if bestDistSq is not None else None
+
+  def setEnd(self, point, time):
+    self.endTime = time
+    self.endPoint = point
+    self.endDistance = self.evaluateTrajectoryDistance(time)
+    self.__setupTrajectoryLine()
+    return time, self.endDistance
   
   def evaluateTrajectoryDistance(self, time, eps=1e-12):
     """
@@ -242,6 +320,13 @@ class ProjectileTrajectory():
       time = self.__getCurrentTime()
 
     return self.startPoint + self.startVelocity.scale(time) + self.acceleration.scale(0.5 * time * time)
+
+  def __distanceSquaredAtTime(self, point, time):
+    pos = self.evaluatePosition(time)
+    dx = pos.x - point.x
+    dy = pos.y - point.y
+    dz = pos.z - point.z
+    return dx*dx + dy*dy + dz*dz
   
   def update(self):
     if self.marker is not None:
