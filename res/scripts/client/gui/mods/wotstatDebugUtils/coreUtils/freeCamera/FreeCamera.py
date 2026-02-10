@@ -43,6 +43,7 @@ EPSILON = 0.0001
 MAX_ZOOM_LEVEL = 2000.0
 MIN_ZOOM_LEVEL = 1.0
 ZOOM_LEVEL_RAMP_TIME = 0.1
+VERTICAL_SPEED_MULTIPLIER = 1.0 / 1.5
 
 
 class WotstatFreeCamera(ICamera, CallbackDelayer, TimeDeltaMeter):
@@ -153,7 +154,7 @@ class WotstatFreeCamera(ICamera, CallbackDelayer, TimeDeltaMeter):
       self.zoomLevel = 1.0
 
   def getMaxSpeed(self):
-    maxVerticalSpeed = min(max(self.maxSpeed / 2, 5), self.maxSpeed)
+    maxVerticalSpeed = min(max(self.maxSpeed * VERTICAL_SPEED_MULTIPLIER, 5), self.maxSpeed)
     return self.maxSpeed, maxVerticalSpeed
   
   def updateZoom(self):

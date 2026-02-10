@@ -12,6 +12,7 @@ class Marker(object):
     self._size = None # type: Optional[float]
     self._color = None # type: Optional[int]
     self._text = None # type: Optional[str]
+    self._visible = True
     
   @property
   def position(self):
@@ -33,6 +34,11 @@ class Marker(object):
     # type: () -> Optional[str]
     return self._text
   
+  @property
+  def visible(self):
+    # type: () -> bool
+    return self._visible
+  
   @position.setter
   def position(self, value):
     # type: (Optional[Tuple[float, float, float]]) -> None
@@ -53,6 +59,18 @@ class Marker(object):
     # type: (Optional[str]) -> None
     self._setup(text=value)
     
+  @visible.setter
+  def visible(self, value):
+    # type: (bool) -> None
+    if self._visible == value: return
+
+    if value:
+      self._controller._setupMarker(self)
+    else:
+      self._controller._destroyMarker(self)
+
+    self._visible = value
+
   def _setup(self, position=None, size=None, color=None, text=None):
     # type: (Optional[Tuple[float, float, float]], Optional[float], Optional[int], Optional[str]) -> None
     if position is not None: self._position = position
@@ -60,7 +78,7 @@ class Marker(object):
     if color is not None: self._color = color
     if text is not None: self._text = text
     self._controller._setupMarker(self)
-    
+  
   def destroy(self):
     # type: () -> None
     self._controller._destroyMarker(self)
