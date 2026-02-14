@@ -1,13 +1,15 @@
 import math
 import BigWorld
 from gui.debugUtils import ui, gizmos, NiceColors, LineEnd, drawer, NiceColorsHex
+from visual_script_client.vehicle_common import TriggerListener
+import BattleReplay
 
 from helpers import dependency
 from skeletons.gui.shared.utils import IHangarSpace
 from Vehicle import Vehicle
 from Event import SafeEvent
 from ProjectileMover import ProjectileMover
-from Avatar import PlayerAvatar
+from Avatar import PlayerAvatar, getVehicleShootingPositions
 from items import vehicles
 from constants import SERVER_TICK_LENGTH
 import Math
@@ -49,6 +51,20 @@ def explodeProjectile(self, *a, **k):
   return oldExplodeProjectile(self, *a, **k)
 PlayerAvatar.explodeProjectile = explodeProjectile
 
+onShotTriggeredEvent = SafeEvent()
+class ShotTriggerListener(TriggerListener):
+
+  def __init__(self, *args, **kwargs):
+    super(ShotTriggerListener, self).__init__(*args, **kwargs)
+    BigWorld.callback(1, self.subscribe)
+
+  def onPlayerDiscreteShoot(self, *args, **kwargs):
+    onShotTriggeredEvent()
+    
+  def onPlayerShoot(self, *args, **kwargs):
+    onShotTriggeredEvent()
+  
+shotTriggerListener = ShotTriggerListener()
 
 def estimateShotDuration(velocity, acceleration, D=1000.0):
   vx, vy, vz = velocity
@@ -87,7 +103,6 @@ def estimateShotDuration(velocity, acceleration, D=1000.0):
   candidates = [t for t in (t1, t2) if t > 0.0]
   return min(candidates) if candidates else None
 
-
 def clamp(minValue, maxValue, value):
   return max(minValue, min(maxValue, value))
 
@@ -97,11 +112,20 @@ class Shot(object):
     self.projectileUtil = projectileUtil
     self.startTime = BigWorld.time()
 
+    self.shootTime = None
+    self.shootPosition = None # type: Optional[Math.Vector3]
+    self.shootMarker = None # type: Optional[Marker]
+
     self.trajectory = None # type: ProjectileTrajectory
     self.ricochetTrajectory = None # type: ProjectileTrajectory
 
     self.endMarkersData = [] # type: list[Tuple[Math.Vector3, int, str]]
     self.markers = [] # type: list[Marker]
+
+  def addShootMarker(self, shootTime, position):
+    self.shootTime = shootTime
+    self.shootPosition = position
+    self.updateShootMarkerVisibility()
 
   def addProjectile(self, startPoint, startVelocity, acceleration):
     self.trajectory = ProjectileTrajectory(self.projectileUtil, startPoint, startVelocity, acceleration)
@@ -142,8 +166,7 @@ class Shot(object):
 
     if endMarker:
       self.endMarkersData.append(endMarker)
-      visible = self.projectileUtil.showEndMarker and self.projectileUtil.trajectoryEnabled
-      if visible:
+      if self.projectileUtil.showEndMarker and self.projectileUtil.trajectoryEnabled:
         position, color, text = endMarker
         self.markers.append(gizmos.createMarker(position=position, color=color, size=3.0, text=text))
 
@@ -160,6 +183,10 @@ class Shot(object):
       marker.destroy()
     self.markers = []
 
+    if self.shootMarker is not None:
+      self.shootMarker.destroy()
+      self.shootMarker = None
+    
   def updateTrajectoryLine(self):
     if self.trajectory is not None:
       self.trajectory.updateTrajectoryLine()
@@ -175,6 +202,18 @@ class Shot(object):
     elif visible and len(self.markers) == 0:
       for (position, color, text) in self.endMarkersData:
         self.markers.append(gizmos.createMarker(position=position, color=color, size=3.0, text=text))
+
+  def updateShootMarkerVisibility(self):
+    visible = self.projectileUtil.showStartMarker and self.projectileUtil.trajectoryEnabled
+
+    if not visible:
+      if self.shootMarker:
+        self.shootMarker.destroy()
+        self.shootMarker = None
+    elif visible:
+      if self.shootTime:
+        if self.shootMarker: self.shootMarker.destroy()
+        self.shootMarker = gizmos.createMarker(position=self.shootPosition, color=NiceColors.BLUE, size=5.0, text='Shoot -%.3fs' % (self.startTime - self.shootTime))
 
   def update(self):
     if self.trajectory is not None:
@@ -344,11 +383,15 @@ class ProjectileTrajectory():
 
   def updateTrajectoryLine(self):
     if self.projectileUtil.trajectoryEnabled:
-      if not self.projectileUtil.continuousTrajectory and self.endTime:
-        self.trajectoryDrawer.draw(timeTo=self.endTime)
+
+      if not self.projectileUtil.oneTickInterval:
+        if not self.projectileUtil.continuousTrajectory and self.endTime:
+          self.trajectoryDrawer.draw(timeTo=self.endTime)
+        else:
+          endTime = estimateShotDuration(self.startVelocity, self.acceleration, 1000.0)
+          self.trajectoryDrawer.draw(timeTo=endTime)
       else:
-        endTime = estimateShotDuration(self.startVelocity, self.acceleration, 1000.0)
-        self.trajectoryDrawer.draw(timeTo=endTime)
+        self.trajectoryDrawer.draw(timeTo=-1)
 
     else:
       self.trajectoryDrawer.draw(timeTo=-1)
@@ -387,7 +430,7 @@ class ProjectileTrajectory():
   def __updateBulletMarker(self):
     time = self.__getCurrentTime()
 
-    if time < 0.0 or (self.endTime and time > self.endTime and not self.projectileUtil.continuousTrajectory) or not self.projectileUtil.showBulletMarker:
+    if time < 0.0 or (self.endTime and time > self.endTime and not self.projectileUtil.continuousTrajectory) or not self.projectileUtil.showBulletMarker or not self.projectileUtil.trajectoryEnabled:
       self.__destroyBulletMarker()
       return
     
@@ -410,7 +453,7 @@ class ProjectileTrajectory():
     startTime = max(0, time)
     endTime = clamp(0, maxTime, time + SERVER_TICK_LENGTH)
 
-    if endTime < 0.0 or not self.projectileUtil.oneTickInterval:
+    if endTime < 0.0 or not self.projectileUtil.oneTickInterval or not self.projectileUtil.trajectoryEnabled:
       self.intervalTrajectoryDrawer.draw(timeTo=-1)
       return
 
@@ -461,13 +504,13 @@ class ProjectileUtil(CallbackDelayer):
   
   def __init__(self, panel):
     # type: (Panel) -> None
-    global onShowTracerEvent, onStopTracerEvent, onExplodeProjectileEvent
+    global onShowTracerEvent, onStopTracerEvent, onExplodeProjectileEvent, onShotTriggeredEvent
     CallbackDelayer.__init__(self)
 
     self.shots = {} # type: dict[int, Shot]
+    self.lastStartShootMarker = None # type: Optional[Tuple[int, Math.Vector3, Marker]]
 
     self.trajectoryEnabled = False
-    self.compensateSpeedFactor = False
     self.trajectoryDuration = 5.0
     self.compensatedTicks = 0.0
     self.oneTickInterval = False
@@ -475,16 +518,19 @@ class ProjectileUtil(CallbackDelayer):
 
     self.showBulletMarker = True
     self.showEndMarker = True
+    self.showStartMarker = False
 
     self.panel = panel
     self.header = self.panel.addHeaderLine('Projectile')
     self.panel.addCheckboxLine('Trajectory', self.trajectoryEnabled, self.onTrajectoryToggle)
+
+    self.panel.addCheckboxLine('  1Tick interval', self.oneTickInterval, self.onOneTickIntervalToggle)
     self.panel.addCheckboxLine('  Continuous trajectory', self.continuousTrajectory, self.onContinuousTrajectoryToggle)
-    self.panel.addCheckboxLine('  Apply speed factor (x0.8)', self.compensateSpeedFactor, self.onCompensateSpeedFactorToggle)
+    if not BattleReplay.isPlaying():
+      self.panel.addCheckboxLine('  Shoot marker', self.showStartMarker, self.onStartMarkerToggle)
     self.panel.addCheckboxLine('  End marker', self.showEndMarker, self.onEndMarkerToggle)
-    
-    self.panel.addCheckboxLine('1Tick interval', self.oneTickInterval, self.onOneTickIntervalToggle)
-    self.panel.addCheckboxLine('Bullet marker', self.showBulletMarker, self.onShowBulletMarkerToggle)
+
+    self.panel.addCheckboxLine('  Bullet marker', self.showBulletMarker, self.onShowBulletMarkerToggle)
     self.compensatedTicksLine = self.panel.addNumberInputLine('  Compensate ticks', value=self.compensatedTicks, onChangeCallback=self.onCompensatedTicksChange)
 
     self.durationLine = self.panel.addNumberInputLine('Duration', value=self.trajectoryDuration, onChangeCallback=self.onDurationChange)
@@ -492,7 +538,8 @@ class ProjectileUtil(CallbackDelayer):
     onShowTracerEvent += self.handleShowTracerEvent
     onStopTracerEvent += self.handleStopTracerEvent
     onExplodeProjectileEvent += self.handleExplodeProjectileEvent
-    
+    onShotTriggeredEvent += self.handleTriggerShootEvent
+
     self.showStaticCollisionEvents = False
     self.delayCallback(0, self.update)
 
@@ -500,13 +547,11 @@ class ProjectileUtil(CallbackDelayer):
     self.trajectoryEnabled = isEnabled
     self.updateAllShotsTrajectoryLine()
     self.updateAllShotsEndMarkersVisibility()
+    self.updateAllShotsShootMarkerVisibility()
 
   def onContinuousTrajectoryToggle(self, isEnabled):
     self.continuousTrajectory = isEnabled
     self.updateAllShotsTrajectoryLine()
-
-  def onCompensateSpeedFactorToggle(self, isEnabled):
-    self.compensateSpeedFactor = isEnabled
 
   def onCompensatedTicksChange(self, value):
     clampedValue = max(0, min(3, int(value)))
@@ -520,9 +565,14 @@ class ProjectileUtil(CallbackDelayer):
   
   def onOneTickIntervalToggle(self, isEnabled):
     self.oneTickInterval = isEnabled
+    self.updateAllShotsTrajectoryLine()
   
   def onShowBulletMarkerToggle(self, isEnabled):
     self.showBulletMarker = isEnabled
+
+  def onStartMarkerToggle(self, isEnabled):
+    self.showStartMarker = isEnabled
+    self.updateAllShotsShootMarkerVisibility()
 
   def onEndMarkerToggle(self, isEnabled):
     self.showEndMarker = isEnabled
@@ -533,6 +583,8 @@ class ProjectileUtil(CallbackDelayer):
     onShowTracerEvent -= self.handleShowTracerEvent
     onStopTracerEvent -= self.handleStopTracerEvent
     onExplodeProjectileEvent -= self.handleExplodeProjectileEvent
+    onShotTriggeredEvent -= self.handleTriggerShootEvent
+
     self.clearCallbacks()
     for shot in self.shots.values():
       shot.dispose()
@@ -541,6 +593,16 @@ class ProjectileUtil(CallbackDelayer):
   def update(self):
     for shotID, shot in list(self.shots.items()):
       shot.update()
+
+    if self.lastStartShootMarker is not None:
+      startTime, pos, marker = self.lastStartShootMarker
+      elapsed = BigWorld.time() - startTime
+      if elapsed > self.trajectoryDuration:
+        if marker: marker.destroy()
+        self.lastStartShootMarker = None
+      else:
+        if marker:
+          marker.text = 'Shoot -%.3fs' % elapsed
 
     return 0
   
@@ -552,10 +614,24 @@ class ProjectileUtil(CallbackDelayer):
     for shot in self.shots.values():
       shot.updateEndMarkersVisibility()
 
+  def updateAllShotsShootMarkerVisibility(self):
+    for shot in self.shots.values():
+      shot.updateShootMarkerVisibility()
+
   def disposeShot(self, shotID):
     shot = self.shots.pop(shotID, None)
     if shot is not None:
       shot.dispose()
+
+  def handleTriggerShootEvent(self, *a, **k):
+    vehicle = BigWorld.entity(BigWorld.player().playerVehicleID) # type: Vehicle
+    gunPos, _ = getVehicleShootingPositions(vehicle)
+    if self.lastStartShootMarker:
+      _, pos, marker = self.lastStartShootMarker
+      if marker: marker.destroy()
+
+    marker = gizmos.createMarker(position=gunPos, color=NiceColors.BLUE, size=3.0, text='Shoot 0.000s') if self.showStartMarker else None
+    self.lastStartShootMarker = (BigWorld.time(), gunPos, marker)
 
   def handleShowTracerEvent(self, obj, *a, **k):
     if not self.trajectoryEnabled and not self.showBulletMarker:
@@ -576,10 +652,16 @@ class ProjectileUtil(CallbackDelayer):
     shot = self.shots.get(shotID, Shot(self))
     self.shots[shotID] = shot
 
-    projectileSpeedFactor = vehicles.g_cache.commonConfig['miscParams']['projectileSpeedFactor'] if not self.compensateSpeedFactor else 1.0
+    projectileSpeedFactor = vehicles.g_cache.commonConfig['miscParams']['projectileSpeedFactor']
     if isRicochet:
       shot.addRicochet(refStartPoint, refVelocity / projectileSpeedFactor, acceleration / (projectileSpeedFactor ** 2))
     else:
+      if self.lastStartShootMarker:
+        startTime, pos, marker = self.lastStartShootMarker
+        if marker: marker.destroy()
+        self.lastStartShootMarker = None
+        shot.addShootMarker(startTime, pos)
+
       shot.addProjectile(refStartPoint, refVelocity / projectileSpeedFactor, acceleration / (projectileSpeedFactor ** 2))
 
     BigWorld.callback(self.trajectoryDuration, lambda: self.disposeShot(shotID))
@@ -591,8 +673,8 @@ class ProjectileUtil(CallbackDelayer):
       shot.addEndPoint(endPoint)
 
   def handleExplodeProjectileEvent(self, obj, *a, **k):
-    if len(a) == 8:
-      shotID, effectsIndex, prefabEffIndex, effectMaterialIndex, shellTypeIdx, shellCaliber, endPoint, velocityDir = a
+    if len(a) == 10:
+      shotID, effectsIndex, prefabEffIndex, effectMaterialIndex, shellTypeIdx, shellCaliber, endPoint, velocityDir, speed, damagedDestructibles = a
     elif len(a) == 6:
       shotID, effectsIndex, effectMaterialIndex, endPoint, velocityDir, damagedDestructibles = a
       prefabEffIndex = shellTypeIdx = shellCaliber = None

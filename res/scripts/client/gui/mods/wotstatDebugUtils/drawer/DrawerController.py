@@ -8,6 +8,9 @@ import typing
 if typing.TYPE_CHECKING:
   from DebugDrawer import Line, Sphere
 
+from realm import CURRENT_REALM
+IS_LESTA = CURRENT_REALM == 'RU'
+
 class LineModel:
   def __init__(self, points, p1, p2, width, color, backColor, zTest, zWrite, controller):
     self.p1 = p1
@@ -29,6 +32,8 @@ class LineModel:
 
   def __backRender(self, dd):
     # type: (DebugDrawer) -> None
+    if self.backColor is None: return
+    
     line = dd.line() # type: Line
 
     if self.width is not None: line.width(self.width)
@@ -51,8 +56,13 @@ class LineModel:
 
   def render(self, dd):
     # type: (DebugDrawer) -> None
-    if self.backColor is not None: self.__backRender(dd)
-    self.__frontRender(dd)
+
+    if IS_LESTA:
+      self.__backRender(dd)
+      self.__frontRender(dd)
+    else:
+      self.__frontRender(dd)
+      self.__backRender(dd)
 
   def destroy(self):
     self.__controller.removeLine(self)
@@ -106,8 +116,13 @@ class SphereModel:
 
   def render(self, dd):
     # type: (DebugDrawer) -> None
-    if self.backColor is not None: self.__backRender(dd)
-    self.__frontRender(dd)
+
+    if IS_LESTA:
+      self.__backRender(dd)
+      self.__frontRender(dd)
+    else:
+      self.__frontRender(dd)
+      self.__backRender(dd)
 
   def destroy(self):
     self.__controller.removeSphere(self)

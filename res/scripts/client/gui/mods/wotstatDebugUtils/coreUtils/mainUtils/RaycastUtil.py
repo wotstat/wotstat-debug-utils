@@ -56,13 +56,6 @@ collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegm
 collideDynamicStatic = BigWorld.wg_collideDynamicStatic if hasattr(BigWorld, 'wg_collideDynamicStatic') else BigWorld.collideDynamicStatic
 
 
-def round(x, digits=0):
-  if digits == 0:
-    return int(x + 0.5)
-  else:
-    mult = 10 ** digits
-    return float(int(x * mult + 0.5)) / mult
-
 class RaycastUtil(CallbackDelayer):
   hangarSpace = dependency.descriptor(IHangarSpace)
   
@@ -74,6 +67,7 @@ class RaycastUtil(CallbackDelayer):
     self.panel = panel
     self.showMatInfo = False
     self.lineIs3D = False
+    self.serverTime = self.panel.addValueLine('Server time', value='0.0')
     self.header = self.panel.addHeaderLine('Raycast')
     self.distanceLine = self.panel.addValueLine('Cursor distance', value='0')
     self.raycastLine = self.panel.addCheckboxLine('Raycast line (MMB)', onToggleCallback=self.onRaycastToggle)
@@ -86,7 +80,6 @@ class RaycastUtil(CallbackDelayer):
     self.lastStartPoint = None # type: typing.Optional[Math.Vector3]
     self.lastEndPoint = None # type: typing.Optional[Math.Vector3]
 
-    self.lastDistanceUpdateTime = 0
     self.delayCallback(0, self.update)
     
   def dispose(self):
@@ -96,8 +89,7 @@ class RaycastUtil(CallbackDelayer):
     self.panel.removeLine(self.raycast3DLine)
 
   def update(self):
-    if self.lastDistanceUpdateTime + 0.1 > time.time(): return 0.0
-    self.lastDistanceUpdateTime = time.time()
+    self.serverTime.value = '%.3f' % BigWorld.serverTime()
 
     cursorPosition = GUI.mcursor().position
     ray, wpoint = cameras.getWorldRayAndPoint(cursorPosition.x, cursorPosition.y)
@@ -131,7 +123,7 @@ class RaycastUtil(CallbackDelayer):
 
     if res is not None:
       dist = (res[0] - startPoint).length
-      self.distanceLine.value = str(round(dist, 2)) + 'm'
+      self.distanceLine.value = '%.3f' % dist
     else:
       self.distanceLine.value = '-'
 
