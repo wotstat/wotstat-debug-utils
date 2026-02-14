@@ -123,7 +123,7 @@ class RaycastUtil(CallbackDelayer):
 
     if res is not None:
       dist = (res[0] - startPoint).length
-      self.distanceLine.value = '%.3f' % dist
+      self.distanceLine.value = '%.2f' % dist
     else:
       self.distanceLine.value = '-'
 

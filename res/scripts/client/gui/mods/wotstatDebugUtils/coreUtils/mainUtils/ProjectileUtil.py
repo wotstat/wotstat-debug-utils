@@ -518,7 +518,7 @@ class ProjectileUtil(CallbackDelayer):
 
     self.showBulletMarker = True
     self.showEndMarker = True
-    self.showStartMarker = False
+    self.showStartMarker = True
 
     self.panel = panel
     self.header = self.panel.addHeaderLine('Projectile')
@@ -528,6 +528,7 @@ class ProjectileUtil(CallbackDelayer):
     self.panel.addCheckboxLine('  Continuous trajectory', self.continuousTrajectory, self.onContinuousTrajectoryToggle)
     if not BattleReplay.isPlaying():
       self.panel.addCheckboxLine('  Shoot marker', self.showStartMarker, self.onStartMarkerToggle)
+
     self.panel.addCheckboxLine('  End marker', self.showEndMarker, self.onEndMarkerToggle)
 
     self.panel.addCheckboxLine('  Bullet marker', self.showBulletMarker, self.onShowBulletMarkerToggle)

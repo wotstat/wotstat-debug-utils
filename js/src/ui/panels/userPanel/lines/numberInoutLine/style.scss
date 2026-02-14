@@ -58,3 +58,15 @@
     }
   }
 }
+
+.game-mt {
+  .user-panel-number-input-line-container {
+
+    .user-panel-number-input-line-stepper-plus,
+    .user-panel-number-input-line-stepper-minus {
+      div {
+        transform: translateY(-2.5rem);
+      }
+    }
+  }
+}

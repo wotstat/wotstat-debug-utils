@@ -15,6 +15,7 @@ import './utils/ResizeObserverPolyfill'
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
 
 type Model = {
+  game: 'wot' | 'mt'
   visible: boolean
   markers: Array<ModelValue<MarkerData>>
   lines: Array<ModelValue<SimpleLineData>>
@@ -36,7 +37,10 @@ panelController.addPanel(statisticsPanel)
 
 const model = new ReactiveModel<Model>()
 model.subscribe('model')
-model.watch(m => panel.setVisible(m?.visible ?? false), { immediate: true })
+model.watch(m => {
+  panel.setVisible(m?.visible ?? false)
+  if (m) root.classList.add(`game-${m.game}`)
+}, { immediate: true })
 
 const userPanelsController = new UserPanelsController(panelController)
 

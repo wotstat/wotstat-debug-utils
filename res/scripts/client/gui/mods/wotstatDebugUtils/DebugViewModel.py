@@ -5,9 +5,12 @@ from .gizmos.models.PolyLineModel import PolyLineModel
 from .gizmos.models.BoxModel import BoxModel
 from .ui.models.UiModel import UiModel
 
+from realm import CURRENT_REALM
+IS_LESTA = CURRENT_REALM == 'RU'
+
 class DebugViewModel(ViewModel):
   
-  def __init__(self, properties=6, commands=0):
+  def __init__(self, properties=7, commands=0):
     # type: (int, int) -> None
     super(DebugViewModel, self).__init__(properties=properties, commands=commands)
   
@@ -20,6 +23,7 @@ class DebugViewModel(ViewModel):
     self._addArrayProperty('boxes', Array())
     self._addViewModelProperty('ui', UiModel())
     self._addBoolProperty('visible', False)
+    self._addStringProperty('game', 'mt' if IS_LESTA else 'wot')
 
   def getMarkers(self):
     # type: () -> Array
