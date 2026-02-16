@@ -57,6 +57,9 @@ class LineModel:
   def render(self, dd):
     # type: (DebugDrawer) -> None
 
+    hasPoints = (self.p1 is not None and self.p2 is not None) or self.points is not None
+    if not hasPoints: return
+
     if IS_LESTA:
       self.__backRender(dd)
       self.__frontRender(dd)

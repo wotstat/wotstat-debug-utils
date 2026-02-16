@@ -19,6 +19,7 @@ from .gizmos.models.LineModel import LineEnd
 from .coreUtils.mainUtils import MainUtils
 from .coreUtils.replaysUtils import ReplaysUtils
 from .coreUtils.freeCamera import FreeCameraUtils
+from .coreUtils.shootingUtils import ShootingUtils
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
@@ -45,6 +46,7 @@ class WotstatDebugUtils(object):
     InputHandler.g_instance.onKeyUp += self.__handleKeyUpEvent
     self.utils = [
       MainUtils(),
+      ShootingUtils(),
       ReplaysUtils(),
       FreeCameraUtils()
     ]
