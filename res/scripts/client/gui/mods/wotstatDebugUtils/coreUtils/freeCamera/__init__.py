@@ -28,6 +28,7 @@ class FreeCameraUtils(object):
     
     self.panel = ui.createPanel('Free Camera')
     self.enabledCheckbox = self.panel.addCheckboxLine('Enable', False, self.onEnableChanged)
+    self.allowShootCheckbox = self.panel.addCheckboxLine('Allow shooting', False)
     self.panel.addHeaderLine('CONTROLS')
     self.panel.addTextLine('WASD/Space/Shift – Move/Up/Down')
     self.panel.addTextLine('Z – zoom, 1-9 – set speed')
@@ -50,11 +51,28 @@ class FreeCameraUtils(object):
     if isPlayerAvatar(): self.enableGameCamera(isEnabled)
     else: self.enableHangarCamera(isEnabled)
 
+  def handleBattleKeyEvent(self, event):
+    # type: (BigWorld.KeyEvent) -> bool
+    
+    if self.activeController and \
+      self.enabled and \
+      event.key == Keys.KEY_LEFTMOUSE and \
+      event.isKeyDown() and \
+      not g_replayCtrl.isPlaying and \
+      not event.isCtrlDown() and \
+      self.allowShootCheckbox.isChecked and isPlayerAvatar():
+      BigWorld.player().shoot()
+      return True
+    
+    return False
+    
+
   def handleKeyEvent(self, event):
     # type: (BigWorld.KeyEvent) -> bool
     if self.enabled and self.activeController is self.hangarCameraController:
       if self.hangarCameraController.handleKeyEvent(event):
         return True
+      
     return False
   
   def handleReplayKeyEvent(self, isDown, key, mods, isRepeat, event):
@@ -87,11 +105,13 @@ class FreeCameraUtils(object):
       inputHandler.onControlModeChanged(CTRL_MODE_NAME.VIDEO)
       self.activeController = self.gameCameraController
       if g_replayCtrl.isPlaying: replayKeyListeners.add(self.handleReplayKeyEvent)
+      keyListeners.add(self.handleBattleKeyEvent)
     else:
       inputHandler._AvatarInputHandler__ctrls[CTRL_MODE_NAME.VIDEO] = self.oldGameCameraVideoController
       inputHandler.onControlModeChanged(CTRL_MODE_NAME.ARCADE)
       self.activeController = None
       if g_replayCtrl.isPlaying: replayKeyListeners.discard(self.handleReplayKeyEvent)
+      keyListeners.discard(self.handleBattleKeyEvent)
 
   def enableHangarCamera(self, enable):
     self.enabledCheckbox.isChecked = enable

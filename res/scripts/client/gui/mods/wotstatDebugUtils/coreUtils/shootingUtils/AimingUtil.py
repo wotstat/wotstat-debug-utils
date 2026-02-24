@@ -5,41 +5,13 @@ from Event import SafeEvent
 from Math import Vector3
 from VehicleGunRotator import VehicleGunRotator
 from gui.debugUtils import gizmos, drawer, NiceColors, NiceColorsHex
+from projectile_trajectory import computeProjectileTrajectory
+from projectile_trajectory import getShotAngles
 from ...utils import cssToHexColor
+from .BallisticTrajectory import BallisticTrajectory
 
 from ...Logger import Logger
 
-try:
-  from projectile_trajectory import computeProjectileTrajectoryWithEnd
-except ImportError:
-  def computeProjectileTrajectoryWithEnd(beginPoint, endPoint, velocity, gravity, epsilon):
-    checkPoints = []
-    stack = [(velocity, beginPoint, endPoint)]
-    while len(stack) > 0:
-      lastIdx = len(stack) - 1
-      v1, p1, p2 = stack[lastIdx]
-      del stack[lastIdx]
-      delta = p2 - p1
-      xzNormal = Math.Vector3(-delta.z, 0.0, delta.x)
-      normal = xzNormal * delta
-      if abs(normal.y) < epsilon:
-        checkPoints.append(p2)
-        continue
-      normal.normalise()
-      extremeTime = normal.dot(v1) / (-gravity.y * normal.y)
-      extremePoint = v1.scale(extremeTime) + gravity.scale(extremeTime * extremeTime * 0.5)
-      dist = abs(normal.dot(extremePoint))
-      if dist > epsilon:
-        extremeVelocity = v1 + gravity.scale(extremeTime)
-        stack.append((extremeVelocity, p1 + extremePoint, p2))
-        stack.append((v1, p1, p1 + extremePoint))
-      else:
-        checkPoints.append(p2)
-
-    return checkPoints
-
-
-SHELL_TRAJECTORY_EPSILON_CAMERA = 0.03
 
 import typing
 if typing.TYPE_CHECKING:
@@ -53,9 +25,16 @@ logger = Logger.instance()
 
 SERVER_COLOR = cssToHexColor("#64D2FF")
 SERVER_BACK_COLOR = cssToHexColor("#6490a2")
+AFTER_SERVER_COLOR = cssToHexColor("#B1CEDA")
+AFTER_SERVER_BACK_COLOR = cssToHexColor("#868F93")
 
 CLIENT_COLOR = cssToHexColor("#D37CFF")
 CLIENT_BACK_COLOR = cssToHexColor("#8f6e9c")
+AFTER_CLIENT_COLOR = cssToHexColor("#D0B0D0")
+AFTER_CLIENT_BACK_COLOR = cssToHexColor("#948494")
+
+BEFORE_MARKER_TRAJECTORY_EPSILON = 0.01
+AFTER_MARKER_TRAJECTORY_EPSILON = 0.02
 
 
 updateGunMarkerEvent = SafeEvent()
@@ -101,9 +80,8 @@ def calculateLineDiskPoints(center, normal, radius, numPoints):
   
   return points, tangent, bitangent
 
-def getGunLines(gunRotator, shotPos, shotVec, dispersionAngles, gravity):
-  # type: (VehicleGunRotator, Vector3, Vector3, list[float], float) -> Tuple[list[Vector3], Optional[list[Vector3]], Optional[Vector3], Optional[Vector3]]
-
+def getMarkerEndPoint(gunRotator, shotPos, shotVec, dispersionAngles):
+   # type: (VehicleGunRotator, Vector3, Vector3, list[float]) -> Tuple[Vector3, Vector3, float]
   if hasattr(gunRotator, '_VehicleGunRotator__getGunMarkerPosition'):
     endPos, endDir, size, _, _, _, _ = gunRotator._VehicleGunRotator__getGunMarkerPosition(shotPos, shotVec, dispersionAngles)
   else:
@@ -112,13 +90,22 @@ def getGunLines(gunRotator, shotPos, shotVec, dispersionAngles, gravity):
     endDir = marker.direction
     size = marker.size
 
+  return endPos, endDir, size
+
+def getTrajectories(shotPos, shotVec, endPos, gravity, shellVelocity, afterDuration=5.0):
+  # type: (Vector3, Vector3, Vector3, float, float, float) -> Tuple[list[Vector3], Optional[list[Vector3]]]
+
   acceleration = Vector3(0, -gravity, 0)
-  trajectoryPoints = computeProjectileTrajectoryWithEnd(endPos, shotPos, -shotVec, acceleration, SHELL_TRAJECTORY_EPSILON_CAMERA)
-  trajectoryPoints.insert(0, endPos)
 
-  diskPoints, tangent, bitangent = calculateLineDiskPoints(endPos, endDir, size, 64)
+  velocity = shotVec # type: Vector3
+  velocity.normalise()
+  velocity = velocity * shellVelocity
+  calc = BallisticTrajectory(shotPos, velocity, acceleration)
 
-  return trajectoryPoints, diskPoints, tangent, bitangent
+  _, markerTime, dist = calc.getNearestPoint(endPos, timeFrom=0.0, timeTo=5.0)
+  beforePoints = calc.getTrajectoryPoints(0, markerTime, BEFORE_MARKER_TRAJECTORY_EPSILON)
+  afterPoints = calc.getTrajectoryPoints(markerTime, markerTime + afterDuration, AFTER_MARKER_TRAJECTORY_EPSILON) if dist < 0.5 and afterDuration > 0 else []
+  return beforePoints, afterPoints
 
 class AimingUtil(object):
   
@@ -127,8 +114,11 @@ class AimingUtil(object):
     global updateGunMarkerEvent, updateGunMarkerClientEvent, onShowTracerEvent
 
     self.serverTrajectory = drawer.createLine(points=[], color=SERVER_COLOR, backColor=SERVER_BACK_COLOR)
+    self.afterServerTrajectory = drawer.createLine(points=[], color=AFTER_SERVER_COLOR, backColor=AFTER_SERVER_BACK_COLOR)
     self.serverCircle = drawer.createLine(points=[], color=SERVER_COLOR, backColor=SERVER_BACK_COLOR)
+    
     self.clientTrajectory = drawer.createLine(points=[], color=CLIENT_COLOR, backColor=CLIENT_BACK_COLOR)
+    self.afterClientTrajectory = drawer.createLine(points=[], color=AFTER_CLIENT_COLOR, backColor=AFTER_CLIENT_BACK_COLOR)
     self.clientCircle = drawer.createLine(points=[], color=CLIENT_COLOR, backColor=CLIENT_BACK_COLOR)
 
     self.showServerCircle = False
@@ -136,6 +126,7 @@ class AimingUtil(object):
     self.showClientCircle = False
     self.showClientTrajectory = True
     self.preserveOnShot = False
+    self.continuousTrajectory = False
     
     self.panel = panel
     self.header = self.panel.addHeaderLine('Aiming')
@@ -143,6 +134,7 @@ class AimingUtil(object):
     self.panel.addCheckboxLine('  Trajectory', self.showServerTrajectory, self.onShowServerTrajectoryChanged)
     self.panel.addCheckboxLine('Client aiming circle', self.showClientCircle, self.onShowClientCircleChanged)
     self.panel.addCheckboxLine('  Trajectory', self.showClientTrajectory, self.onShowClientTrajectoryChanged)
+    self.panel.addCheckboxLine('Continuous trajectory', self.continuousTrajectory, self.onContinuousTrajectoryChanged)
     self.panel.addCheckboxLine('Preserve on shot', self.preserveOnShot, self.onPreserveOnShotChanged)
 
 
@@ -176,29 +168,64 @@ class AimingUtil(object):
   def onPreserveOnShotChanged(self, value):
     self.preserveOnShot = value
 
+  def onContinuousTrajectoryChanged(self, value):
+    self.continuousTrajectory = value
+
   def onUpdateGunMarker(self, obj, vehicleID, shotPos, shotVec, dispersionAngle, *a, **k):
-    # type: (PlayerAvatar, int, Vector3, Vector3, float, Tuple, dict) -> None
+    # type: (AimingUtil, PlayerAvatar, int, Vector3, Vector3, float, Tuple, dict) -> None
 
     if not obj.gunRotator: return
 
-    gravity = obj.getVehicleDescriptor().shot.gravity
-    trajectoryPoints, diskPoints, tangent, bitangent = getGunLines(
-      obj.gunRotator, shotPos, shotVec, [dispersionAngle, dispersionAngle, dispersionAngle, dispersionAngle], gravity)
+    if not self.showServerTrajectory or not self.showServerCircle:
+      self.serverTrajectory.points = []
+      self.afterServerTrajectory.points = []
 
-    self.serverTrajectory.points = trajectoryPoints if self.showServerTrajectory else []
-    self.serverCircle.points = diskPoints if self.showServerTrajectory and self.showServerCircle else []
+    if not self.showServerCircle:
+      self.serverCircle.points = []
+      return
 
+    shot = obj.getVehicleDescriptor().shot
+    gravity = shot.gravity
+    velocity = shot.speed
+
+    endPos, endDir, size = getMarkerEndPoint(obj.gunRotator, shotPos, shotVec, [dispersionAngle, dispersionAngle, dispersionAngle, dispersionAngle])
+    diskPoints, tangent, bitangent = calculateLineDiskPoints(endPos, endDir, size / 2.0, 64)
+
+    if self.showServerCircle:
+      self.serverCircle.points = diskPoints
+
+      if self.showServerTrajectory:
+        trajectoryPoints, afterTrajectoryPoints = getTrajectories(shotPos, shotVec, endPos, gravity, velocity, 5.0 if self.continuousTrajectory else 0.0    )
+        self.serverTrajectory.points = trajectoryPoints
+        self.afterServerTrajectory.points = afterTrajectoryPoints
+  
   def onUpdateGunMarkerClient(self, obj, *a, **k):
     # type: (VehicleGunRotator, Tuple, dict) -> None
 
+    if not self.showClientTrajectory or not self.showClientCircle:
+      self.clientTrajectory.points = []
+      self.afterClientTrajectory.points = []
+
+    if not self.showClientCircle:
+      self.clientCircle.points = []
+      return
+
     shotPos, shotVec = obj.getCurShotPosition()
     dispersionAngles = obj._VehicleGunRotator__dispersionAngles
-    gravity = obj._avatar.getVehicleDescriptor().shot.gravity
+    shot = obj._avatar.getVehicleDescriptor().shot
+    gravity = shot.gravity
+    velocity = shot.speed
 
-    trajectoryPoints, diskPoints, tangent, bitangent = getGunLines(obj, shotPos, shotVec, dispersionAngles, gravity)
+    endPos, endDir, size = getMarkerEndPoint(obj, shotPos, shotVec, dispersionAngles)
+    diskPoints, tangent, bitangent = calculateLineDiskPoints(endPos, endDir, size / 2.0, 64)
+    trajectoryPoints, afterTrajectoryPoints = getTrajectories(shotPos, shotVec, endPos, gravity, velocity, 5.0 if self.continuousTrajectory else 0.0)
 
-    self.clientTrajectory.points = trajectoryPoints if self.showClientTrajectory else []
-    self.clientCircle.points = diskPoints if self.showClientTrajectory and self.showClientCircle else []
+    if self.showClientCircle:
+      self.clientCircle.points = diskPoints
+
+      if self.showClientTrajectory:
+        self.clientTrajectory.points = trajectoryPoints
+        self.afterClientTrajectory.points = afterTrajectoryPoints
 
   def onShowTracerEvent(self, obj, attackerID, *a, **k):
     if attackerID != BigWorld.player().playerVehicleID:
@@ -207,17 +234,17 @@ class AimingUtil(object):
     if not self.preserveOnShot:
       return
     
-    if self.showServerTrajectory:
-      drawer.createLine(points=self.serverTrajectory.points, color=SERVER_COLOR, backColor=SERVER_BACK_COLOR, timeout=5.0)
-    
     if self.showServerCircle:
       drawer.createLine(points=self.serverCircle.points, color=SERVER_COLOR, backColor=SERVER_BACK_COLOR, timeout=5.0)
-
-    if self.showClientTrajectory:
-      drawer.createLine(points=self.clientTrajectory.points, color=CLIENT_COLOR, backColor=CLIENT_BACK_COLOR, timeout=5.0)
+      if self.showServerTrajectory:
+        drawer.createLine(points=self.serverTrajectory.points, color=SERVER_COLOR, backColor=SERVER_BACK_COLOR, timeout=5.0)
+        drawer.createLine(points=self.afterServerTrajectory.points, color=AFTER_SERVER_COLOR, backColor=AFTER_SERVER_BACK_COLOR, timeout=5.0)
 
     if self.showClientCircle:
       drawer.createLine(points=self.clientCircle.points, color=CLIENT_COLOR, backColor=CLIENT_BACK_COLOR, timeout=5.0)
+      if self.showClientTrajectory:
+        drawer.createLine(points=self.clientTrajectory.points, color=CLIENT_COLOR, backColor=CLIENT_BACK_COLOR, timeout=5.0)
+        drawer.createLine(points=self.afterClientTrajectory.points, color=AFTER_CLIENT_COLOR, backColor=AFTER_CLIENT_BACK_COLOR, timeout=5.0)
 
     
 
