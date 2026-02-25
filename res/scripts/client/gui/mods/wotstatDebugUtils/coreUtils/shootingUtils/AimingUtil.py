@@ -1,15 +1,14 @@
-import math, Math, BigWorld
+import math, BigWorld
 
 from Avatar import PlayerAvatar
 from Event import SafeEvent
 from Math import Vector3
 from VehicleGunRotator import VehicleGunRotator
-from gui.debugUtils import gizmos, drawer, NiceColors, NiceColorsHex
-from projectile_trajectory import computeProjectileTrajectory
-from projectile_trajectory import getShotAngles
+from gui.debugUtils import drawer, gizmos
+from PlayerEvents import g_playerEvents
+
 from ...utils import cssToHexColor
 from .BallisticTrajectory import BallisticTrajectory
-
 from ...Logger import Logger
 
 
@@ -17,7 +16,6 @@ import typing
 if typing.TYPE_CHECKING:
   from VehicleGunRotator import GunMarkerInfo
   from ...ui.models.UiModel import Panel
-  from ...gizmos.Marker import Marker
   from typing import Tuple, Optional
 
 logger = Logger.instance()
@@ -141,6 +139,7 @@ class AimingUtil(object):
     updateGunMarkerEvent += self.onUpdateGunMarker
     updateGunMarkerClientEvent += self.onUpdateGunMarkerClient
     onShowTracerEvent += self.onShowTracerEvent
+    g_playerEvents.onAvatarBecomeNonPlayer += self.onAvatarBecomeNonPlayer
 
   def dispose(self):
     global updateGunMarkerEvent, updateGunMarkerClientEvent, onShowTracerEvent
@@ -148,6 +147,14 @@ class AimingUtil(object):
     updateGunMarkerEvent -= self.onUpdateGunMarker
     updateGunMarkerClientEvent -= self.onUpdateGunMarkerClient
     onShowTracerEvent -= self.onShowTracerEvent
+
+  def onAvatarBecomeNonPlayer(self):
+    self.serverCircle.points = []
+    self.serverTrajectory.points = []
+    self.afterServerTrajectory.points = []
+    self.clientCircle.points = []
+    self.clientTrajectory.points = []
+    self.afterClientTrajectory.points = []
 
   def onShowServerCircleChanged(self, value):
     self.showServerCircle = value

@@ -34,9 +34,7 @@ class BallisticTrajectory(object):
     startPos = self.getPoint(timeFrom)
     startVel = self.getVelocity(timeFrom)
 
-    acceleration = self.acceleration if IS_LESTA else self.gravity
-
-    points = computeProjectileTrajectory(startPos, startVel, acceleration, timeTo - timeFrom, epsilon)
+    points = computeProjectileTrajectory(startPos, startVel, self.acceleration, timeTo - timeFrom, epsilon)
     points.insert(0, startPos)
 
     return points
