@@ -4,7 +4,7 @@ from Avatar import PlayerAvatar
 from Event import SafeEvent
 from Math import Vector3
 from VehicleGunRotator import VehicleGunRotator
-from gui.debugUtils import drawer, gizmos
+from gui.debugUtils import drawer
 from PlayerEvents import g_playerEvents
 
 from ...utils import cssToHexColor

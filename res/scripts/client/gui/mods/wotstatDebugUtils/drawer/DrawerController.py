@@ -1,5 +1,6 @@
 import BigWorld
 
+from Event import SafeEvent
 from helpers.CallbackDelayer import CallbackDelayer
 from DebugDrawer import DebugDrawer, Sphere, BM_TRANSPARENT
 from Math import Vector3
@@ -137,10 +138,13 @@ class DrawerController(CallbackDelayer):
     CallbackDelayer.__init__(self)
     self.lines = [] # type: list[LineModel]
     self.spheres = [] # type: list[SphereModel]
+    self.onBeforeDraw = SafeEvent()
     
     self.delayCallback(0.0, self.update)
 
   def update(self):
+    self.onBeforeDraw()
+    
     dd = DebugDrawer() # type: DebugDrawer
 
     for line in self.lines:
@@ -172,6 +176,16 @@ class DrawerController(CallbackDelayer):
     if timeout is not None: BigWorld.callback(timeout, sphere.destroy)
 
     return sphere
+
+  def clear(self):
+    self.clearLines()
+    self.clearSpheres()
+
+  def clearLines(self):
+    self.lines = []
+
+  def clearSpheres(self):
+    self.spheres = []
 
   def removeLine(self, line):
     if line in self.lines:
