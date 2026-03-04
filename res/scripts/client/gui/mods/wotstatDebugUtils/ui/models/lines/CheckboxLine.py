@@ -13,6 +13,7 @@ class CheckboxLine(Line):
     super(CheckboxLine, self)._initialize()
     self._addStringProperty('label', '')
     self._addBoolProperty('isChecked', False)
+    self._isCheckedCache = False
     self._onCheckboxToggleCommand = self._addCommand('onCheckboxToggle')
     
     self._onCheckboxToggleCommand += self._onCheckboxToggle
@@ -40,10 +41,11 @@ class CheckboxLine(Line):
   @property
   def isChecked(self):
     # type: () -> bool
-    return self._getBool(2)
+    return self._isCheckedCache
   
   @isChecked.setter
   def isChecked(self, value):
     # type: (bool) -> None
+    self._isCheckedCache = value
     self._setBool(2, value)
     

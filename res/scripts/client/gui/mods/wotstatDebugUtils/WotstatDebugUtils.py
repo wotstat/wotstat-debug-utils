@@ -20,6 +20,7 @@ from .coreUtils.mainUtils import MainUtils
 from .coreUtils.replaysUtils import ReplaysUtils
 from .coreUtils.freeCamera import FreeCameraUtils
 from .coreUtils.shootingUtils import ShootingUtils
+from .coreUtils.spottingUtils import SpottingUtils
 
 DEBUG_MODE = '{{DEBUG_MODE}}'
 VERSION = '{{VERSION}}'
@@ -47,6 +48,7 @@ class WotstatDebugUtils(object):
     self.utils = [
       MainUtils(),
       ShootingUtils(),
+      SpottingUtils(),
       ReplaysUtils(),
       FreeCameraUtils()
     ]
