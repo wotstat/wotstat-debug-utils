@@ -1,19 +1,19 @@
 import BigWorld, math
 from Math import Vector3, Matrix
 from vehicle_systems import model_assembler
-from helpers import dependency
+from helpers import dependency, isPlayerAvatar
 from skeletons.gui.shared.utils import IHangarSpace
 from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
 from HangarVehicle import HangarVehicle
 from Vehicle import Vehicle
 from gui.debugUtils import drawer
+from gui.battle_control import avatar_getter
 
 import typing
 if typing.TYPE_CHECKING:
   from ...drawer.DrawerController import LineModel
-  from ...gizmos.Marker import Marker
   from ...ui.models.UiModel import Panel
-  from typing import Tuple, Optional, List
+  from typing import Tuple, List
 
 
 COLORS = {
@@ -73,11 +73,14 @@ class BboxUtil(object):
     if not self.showOwn and not self.showAny: return
     isInHangar = self.hangarSpace and self.hangarSpace.spaceID is not None
     if isInHangar: return
+    if not avatar_getter.isPlayerAvatar(): return
 
     self.hideBboxes()
 
     if self.showAny:
-      vehicles = BigWorld.player().arena.vehicles.keys()
+      arena = avatar_getter.getArena()
+      if not arena: return
+      vehicles = arena.vehicles.keys()
 
       for vehicleID in vehicles:
         vehicle = BigWorld.entities.get(vehicleID)
