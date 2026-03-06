@@ -6,20 +6,22 @@ from skeletons.gui.shared.utils import IHangarSpace
 from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
 from HangarVehicle import HangarVehicle
 from Vehicle import Vehicle
-from gui.debugUtils import drawer
+from gui.debugUtils import drawer, gizmos
 from gui.battle_control import avatar_getter
+from collections import namedtuple
+
 
 from ...utils import cssToHexColor
 
 import typing
 if typing.TYPE_CHECKING:
-  from ...drawer.DrawerController import LineModel
+  from ...drawer.DrawerController import LineModel, SphereModel
   from ...gizmos.Marker import Marker
   from ...ui.models.UiModel import Panel
-  from typing import Tuple, Optional, List, Dict
+  from typing import Tuple, Optional, List, Dict, Union
 
 
-SPOT_POINT_COLOR = (cssToHexColor("#0e9eff"), cssToHexColor("#5885ae"))
+SPOT_POINT_COLOR = (cssToHexColor("#0e9eff"), cssToHexColor("#4c95d4"))
 MASK_POINT_COLOR = (cssToHexColor("#ff3135"), cssToHexColor("#ab6d67"))
 
 MY_SPOT_LINE_COLOR = cssToHexColor("#0e9eff")
@@ -29,6 +31,15 @@ MY_MASK_LINE_COLLIDE_COLOR = cssToHexColor("#917a76")
 
 MAX_RAY_DISTANCE_SQR = 455 ** 2
 
+class RayInfo(object):
+  __slots__ = ('source', 'target', 'distance', 'isDirect', 'vehicle')
+
+  def __init__(self, source, target, distance, isDirect=False, vehicle=None):
+    self.source = source
+    self.target = target
+    self.distance = distance
+    self.isDirect = isDirect
+    self.vehicle = vehicle
 
 collideSegment = BigWorld.wg_collideSegment if hasattr(BigWorld, 'wg_collideSegment') else BigWorld.collideSegment
 
@@ -38,8 +49,8 @@ class SpottingUtil(object):
   def __init__(self, panel):
     # type: (Panel) -> None
 
-
-    self.bboxLines = [] # type: List[LineModel]
+    self.drawerable = [] # type: List[Union[LineModel, SphereModel]]
+    self.markers = {} # type: Dict[Vehicle, List[Marker]]
 
     self.panel = panel
 
@@ -52,11 +63,11 @@ class SpottingUtil(object):
     self.ownSpotRays = self.panel.addCheckboxLine('OWN spot rays')
     self.ownMaskRays = self.panel.addCheckboxLine('OWN mask rays')
 
-    self.anySpotRays = self.panel.addCheckboxLine('ANY spot rays')
-    self.anyMaskRays = self.panel.addCheckboxLine('ANY mask rays')
+    self.allySpotRays = self.panel.addCheckboxLine('ALL spot rays')
+    self.allyMaskRays = self.panel.addCheckboxLine('ALL mask rays')
 
     self.panel.addSeparatorLine()
-    self.panel.addCheckboxLine('Min distance text')
+    self.distanceText = self.panel.addCheckboxLine('Min distance text')
     self.nearestOnly = self.panel.addCheckboxLine('Nearest only')
     self.nonDirectRays = self.panel.addCheckboxLine('Show not direct')
     
@@ -74,10 +85,9 @@ class SpottingUtil(object):
   def update(self):
     isInHangar = self.hangarSpace and self.hangarSpace.spaceID is not None
     if isInHangar: return
-    if not avatar_getter.isPlayerAvatar(): return
-
     arena = avatar_getter.getArena()
     if not arena: return
+
     vehicles = arena.vehicles.keys()
 
     targetVehicles = [BigWorld.entities.get(vehicleID) for vehicleID in vehicles if isinstance(BigWorld.entities.get(vehicleID), Vehicle)]
@@ -86,8 +96,8 @@ class SpottingUtil(object):
     self.draw(targetVehicles)
 
   def hideBboxes(self):
-    for line in self.bboxLines: line.destroy()
-    self.bboxLines = []
+    for line in self.drawerable: line.destroy()
+    self.drawerable = []
 
   def updateHangarVehicle(self):
     isInHangar = self.hangarSpace and self.hangarSpace.spaceID is not None
@@ -117,69 +127,101 @@ class SpottingUtil(object):
         segments, crosses = getBboxSegments(*spotBbox)
 
         for seg in segments:
-          self.bboxLines.append(drawer.createLine(points=[matrix.applyPoint(p) for p in seg], color=0xFFFFFF))
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in seg], color=0xFFFFFF))
       
         if self.showBBoxAlign.isChecked:
           for cross in crosses:
-            self.bboxLines.append(drawer.createLine(points=[matrix.applyPoint(p) for p in cross], color=0xcecece))
+            self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in cross], color=0xcecece))
 
       if self.viewRangePorts.isChecked or \
         self.visibilityCheckpoints.isChecked or \
         self.ownMaskRays.isChecked or self.ownSpotRays.isChecked or \
-        self.anyMaskRays.isChecked or self.anySpotRays.isChecked:
+        self.allyMaskRays.isChecked or self.allySpotRays.isChecked:
 
         maskPoints, spotPoints = getMaskSpotPoints(vehicle, spotBbox)
 
         vehiclePoints[vehicle] = {
           'mask': maskPoints,
           'spot': spotPoints,
-          'bbox': spotBbox
+          'bbox': spotBbox,
+          'spotRays': []
         }
 
     for vehicle, points in vehiclePoints.items():
       if self.visibilityCheckpoints.isChecked:
         for p in points['mask']:
-          self.bboxLines.append(drawer.createSphere(p, radius=0.05, color=MASK_POINT_COLOR[0], backColor=MASK_POINT_COLOR[1]))
+          self.drawerable.append(drawer.createSphere(p, radius=0.05, color=MASK_POINT_COLOR[0], backColor=MASK_POINT_COLOR[1]))
 
       if self.viewRangePorts.isChecked:
         for p in points['spot']:
-          self.bboxLines.append(drawer.createSphere(p, radius=0.05, color=SPOT_POINT_COLOR[0], backColor=SPOT_POINT_COLOR[1]))
+          self.drawerable.append(drawer.createSphere(p, radius=0.05, color=SPOT_POINT_COLOR[0], backColor=SPOT_POINT_COLOR[1]))
 
     if isInHangar: return
 
     ownVehicle = BigWorld.entities.get(BigWorld.player().playerVehicleID)
-    if self.ownSpotRays.isChecked or self.ownMaskRays.isChecked:
-      ownPoints = vehiclePoints.get(ownVehicle)
+    if self.ownSpotRays.isChecked or self.ownMaskRays.isChecked or self.allySpotRays.isChecked or self.allyMaskRays.isChecked or self.distanceText.isChecked:
       ownTeam = ownVehicle.team
 
-      for vehicle, points in vehiclePoints.items():
-        if vehicle.team == ownTeam: continue
-        if not vehicle.isAlive(): continue
+      enemyVehicles = [v for v in vehiclePoints if v.isAlive() and v.team != ownTeam]
+      allyVehicles = [v for v in vehiclePoints if v.isAlive() and v.team == ownTeam]
+      
+      groups = []
 
-        if self.ownMaskRays.isChecked: self.drawRays(ownPoints['mask'], points['spot'], MY_MASK_LINE_COLOR, MY_MASK_LINE_COLLIDE_COLOR)
-        if self.ownSpotRays.isChecked: self.drawRays(ownPoints['spot'], points['mask'], MY_SPOT_LINE_COLOR, MY_SPOT_LINE_COLLIDE_COLOR)
+      if self.allySpotRays.isChecked: groups.append((allyVehicles, enemyVehicles))
+      elif self.ownSpotRays.isChecked: groups.append(([ownVehicle], enemyVehicles))
 
-  def drawRays(self, source, target, color, nonDirectColor):
-    # type: (List[Vector3], List[Vector3], int, int) -> None
+      if self.allyMaskRays.isChecked: groups.append((enemyVehicles, allyVehicles))
+      elif self.ownMaskRays.isChecked: groups.append((enemyVehicles, [ownVehicle]))
 
-    lines = [] # type: List[Tuple[Vector3, Vector3, Optional[BigWorld.WGCollideSegmentResult], float]]
+
+      directOnly = not self.nonDirectRays.isChecked
+      
+      for spots, masks in groups:
+        for spotVehicle in spots:
+          spotPoints = vehiclePoints[spotVehicle]['spot']
+          vehiclePoints[spotVehicle]['spotRays'] = []
+
+          for maskVehicle in masks:
+            rays = self.processRays(spotPoints, vehiclePoints[maskVehicle]['mask'], directOnly)
+            for ray in rays: ray.vehicle = maskVehicle
+            vehiclePoints[spotVehicle]['spotRays'].append(rays)
+
+      for vehicle, data in vehiclePoints.items():
+        spotRays = data['spotRays'] # type: List[List[RayInfo]]
+
+        for group in spotRays:
+          for ray in group:
+            rayColor = (MY_SPOT_LINE_COLOR, MY_SPOT_LINE_COLLIDE_COLOR) if ray.vehicle.team != ownTeam else (MY_MASK_LINE_COLOR, MY_MASK_LINE_COLLIDE_COLOR)
+            self.drawerable.append(drawer.createLine(points=[ray.source, ray.target], color=rayColor[0 if ray.isDirect else 1]))
+
+  def processRays(self, source, target, directOnly=False):
+    # type: (List[Vector3], List[Vector3], bool) -> List[RayInfo]
+
+    rays = [] # type: List[RayInfo]
 
     for sourcePoint in source:
       for targetPoint in target:
         distance = sourcePoint.distSqrTo(targetPoint)
         if distance > MAX_RAY_DISTANCE_SQR: continue
-
         hit = collideSegment(BigWorld.player().spaceID, sourcePoint, targetPoint, 128)
-        lines.append((sourcePoint, targetPoint, hit is None, distance))
+        isDirect = hit is None
+        if directOnly and not isDirect: continue
+        rays.append(RayInfo(sourcePoint, targetPoint, distance, isDirect))
+    
+    return rays
 
-    if self.nearestOnly.isChecked:
-      displayOnly = lines if self.nonDirectRays.isChecked else filter(lambda t: t[2], lines)
-      lines = [min(displayOnly, key=lambda x: x[3])] if len(displayOnly) > 0 else []
-
-    for sourcePoint, targetPoint, direct, _ in lines:
-      lineColor = color if direct else nonDirectColor
-      if direct or self.nonDirectRays.isChecked:
-        self.bboxLines.append(drawer.createLine(points=[sourcePoint, targetPoint], color=lineColor))
+  def getMarkerForVehicle(self, vehicle):
+    if vehicle not in self.markers:
+      self.markers[vehicle] = \
+        [gizmos.createMarker(position=Vector3(), size = 2, color='#ff3135') for t in range(7)] + \
+        [gizmos.createMarker(position=Vector3(), size = 2, color='#0e9eff') for t in range(2)]
+      
+    return self.markers[vehicle]
+  
+  def cleanupMarkers(self, vehicle):
+    if vehicle in self.markers:
+      for marker in self.markers[vehicle]: marker.destroy()
+      del self.markers[vehicle]
 
 def getBboxSegments(bboxMin, bboxMax):
   # type: (Vector3, Vector3) -> Tuple[List[List[Vector3]], List[List[Vector3]]]

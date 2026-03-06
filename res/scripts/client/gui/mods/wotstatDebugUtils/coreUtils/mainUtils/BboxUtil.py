@@ -73,7 +73,7 @@ class BboxUtil(object):
     if not self.showOwn and not self.showAny: return
     isInHangar = self.hangarSpace and self.hangarSpace.spaceID is not None
     if isInHangar: return
-    if not avatar_getter.isPlayerAvatar(): return
+    if not isPlayerAvatar(): return
 
     self.hideBboxes()
 
