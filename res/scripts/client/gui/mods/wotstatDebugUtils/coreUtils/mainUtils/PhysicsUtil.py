@@ -9,6 +9,8 @@ import typing
 if typing.TYPE_CHECKING:
   from ...ui.models.UiModel import Panel
 
+from ...i18n import prefix
+t = prefix('mainUtils.physics')
 
 onStaticCollisionEvent = SafeEvent()
 oldOnStaticCollision = Vehicle.onStaticCollision
@@ -26,10 +28,10 @@ class PhysicsUtil(object):
     # type: (Panel) -> None
     global onStaticCollisionEvent
     self.panel = panel
-    self.header = self.panel.addHeaderLine('Physics')
-    self.panel.addCheckboxLine('Static collision events', onToggleCallback=self.onStaticCollisionToggle)
-    self.panel.addCheckboxLine('  Info text', onToggleCallback=self.onInfoTextToggle)
-    self.panel.addCheckboxLine('  From all', onToggleCallback=self.onFromAllToggle)
+    self.header = self.panel.addHeaderLine(t('physics'))
+    self.panel.addCheckboxLine(t('staticCollisionEvents'), onToggleCallback=self.onStaticCollisionToggle)
+    self.panel.addCheckboxLine(t('staticCollisionInfoText'), onToggleCallback=self.onInfoTextToggle)
+    self.panel.addCheckboxLine(t('staticCollisionFromAll'), onToggleCallback=self.onFromAllToggle)
     onStaticCollisionEvent += self.handleStaticCollisionEvent
     
     self.showStaticCollisionEvents = False

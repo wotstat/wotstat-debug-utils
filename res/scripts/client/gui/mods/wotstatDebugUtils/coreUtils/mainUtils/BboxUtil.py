@@ -15,6 +15,8 @@ if typing.TYPE_CHECKING:
   from ...ui.models.UiModel import Panel
   from typing import Tuple, List
 
+from ...i18n import prefix
+t = prefix('mainUtils.bbox')
 
 COLORS = {
   'chassis':   ("#15df55", "#476e4c"),  # green
@@ -38,10 +40,10 @@ class BboxUtil(object):
     self.lines = [] # type: List[LineModel]
 
     self.panel = panel
-    self.header = self.panel.addHeaderLine('BBOX')
-    self.panel.addCheckboxLine('Show OWN bbox', self.showOwn, onToggleCallback=self.onShowOwnToggle)
-    self.panel.addCheckboxLine('Show ANY bbox', self.showAny, onToggleCallback=self.onShowAnyToggle)
-    self.panel.addCheckboxLine('Backface visibility', self.backfaceVisibility, onToggleCallback=self.onBackfaceVisibilityToggle)
+    self.header = self.panel.addHeaderLine(t('bbox'))
+    self.panel.addCheckboxLine(t('showOwn'), self.showOwn, onToggleCallback=self.onShowOwnToggle)
+    self.panel.addCheckboxLine(t('showAny'), self.showAny, onToggleCallback=self.onShowAnyToggle)
+    self.panel.addCheckboxLine(t('backfaceVisibility'), self.backfaceVisibility, onToggleCallback=self.onBackfaceVisibilityToggle)
 
     drawer.onBeforeDraw += self.update
     self.hangarSpace.onVehicleChanged += self.updateHangarVehicle

@@ -12,6 +12,8 @@ from PlayerEvents import g_playerEvents
 from .FreeCamera import WotstatFreeCameraController, WotstatFreeCameraHangarController
 import typing
 from helpers import isPlayerAvatar
+from ...i18n import prefix, t as tr
+t = prefix('freeCamera')
 
 if typing.TYPE_CHECKING:
     from typing import Callable, Set
@@ -26,12 +28,12 @@ class FreeCameraUtils(object):
   def __init__(self):
     global onSetCameraSettings
     
-    self.panel = ui.createPanel('Free Camera')
-    self.enabledCheckbox = self.panel.addCheckboxLine('Enable', False, self.onEnableChanged)
-    self.allowShootCheckbox = self.panel.addCheckboxLine('Allow shooting', False)
-    self.panel.addHeaderLine('CONTROLS')
-    self.panel.addTextLine('WASD/Space/Shift – Move/Up/Down')
-    self.panel.addTextLine('Z – zoom, 1-9 – set speed')
+    self.panel = ui.createPanel(tr('section.freeCameraUtils'))
+    self.enabledCheckbox = self.panel.addCheckboxLine(t('enable'), False, self.onEnableChanged)
+    self.allowShootCheckbox = self.panel.addCheckboxLine(t('allowShooting'), False)
+    self.panel.addHeaderLine(t('controls'))
+    self.panel.addTextLine(t('controls.info'))
+    self.panel.addTextLine(t('controls.info2'))
 
     onSetCameraSettings += self.onSetCameraSettings
     self.gameCameraController = WotstatFreeCameraController()

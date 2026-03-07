@@ -4,6 +4,8 @@ from BattleReplay import g_replayCtrl # type: BattleReplay.BattleReplay
 
 from Event import SafeEvent
 from Avatar import PlayerAvatar
+from ...i18n import prefix, t as tr
+t = prefix('replaysUtils')
 
 import typing
 if typing.TYPE_CHECKING:
@@ -30,10 +32,10 @@ class ReplaysUtils(object):
     self.pauseOnOwnShot = False
     self.pauseOnEnemyShot = False
 
-    self.panel = ui.createPanel('Replays utils')
-    self.panel.addCheckboxLine('Extend slow down', isChecked=True, onToggleCallback=self.onSlowDownToggle)
-    self.panel.addCheckboxLine('Pause on OWN shot', onToggleCallback=self.onPauseOnOwnShotToggle)
-    self.panel.addCheckboxLine('Pause on ANY shot', onToggleCallback=self.onPauseOnEnemyShotToggle)
+    self.panel = ui.createPanel(tr('section.replaysUtils'))
+    self.panel.addCheckboxLine(t('extendSlowDown'), isChecked=True, onToggleCallback=self.onSlowDownToggle)
+    self.panel.addCheckboxLine(t('pauseOnOwnShot'), onToggleCallback=self.onPauseOnOwnShotToggle)
+    self.panel.addCheckboxLine(t('pauseOnEnemyShot'), onToggleCallback=self.onPauseOnEnemyShotToggle)
 
     self.onSlowDownToggle(True)
     onShowTracerEvent += self.onShowTracer

@@ -10,7 +10,8 @@ from PlayerEvents import g_playerEvents
 from ...utils import cssToHexColor
 from .BallisticTrajectory import BallisticTrajectory
 from ...Logger import Logger
-
+from ...i18n import prefix
+t = prefix('shootingUtils.aiming')
 
 import typing
 if typing.TYPE_CHECKING:
@@ -127,13 +128,13 @@ class AimingUtil(object):
     self.continuousTrajectory = False
     
     self.panel = panel
-    self.header = self.panel.addHeaderLine('Aiming')
-    self.panel.addCheckboxLine('Server aiming circle', self.showServerCircle, self.onShowServerCircleChanged)
-    self.panel.addCheckboxLine('  Trajectory', self.showServerTrajectory, self.onShowServerTrajectoryChanged)
-    self.panel.addCheckboxLine('Client aiming circle', self.showClientCircle, self.onShowClientCircleChanged)
-    self.panel.addCheckboxLine('  Trajectory', self.showClientTrajectory, self.onShowClientTrajectoryChanged)
-    self.panel.addCheckboxLine('Continuous trajectory', self.continuousTrajectory, self.onContinuousTrajectoryChanged)
-    self.panel.addCheckboxLine('Preserve on shot', self.preserveOnShot, self.onPreserveOnShotChanged)
+    self.header = self.panel.addHeaderLine(t('aiming'))
+    self.panel.addCheckboxLine(t('serverAimingCircle'), self.showServerCircle, self.onShowServerCircleChanged)
+    self.panel.addCheckboxLine(t('trajectory'), self.showServerTrajectory, self.onShowServerTrajectoryChanged)
+    self.panel.addCheckboxLine(t('clientAimingCircle'), self.showClientCircle, self.onShowClientCircleChanged)
+    self.panel.addCheckboxLine(t('trajectory'), self.showClientTrajectory, self.onShowClientTrajectoryChanged)
+    self.panel.addCheckboxLine(t('continuousTrajectory'), self.continuousTrajectory, self.onContinuousTrajectoryChanged)
+    self.panel.addCheckboxLine(t('preserveOnShot'), self.preserveOnShot, self.onPreserveOnShotChanged)
 
 
     updateGunMarkerEvent += self.onUpdateGunMarker

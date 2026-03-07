@@ -11,6 +11,8 @@ from collections import OrderedDict
 
 
 from ...utils import cssToHexColor
+from ...i18n import prefix
+t = prefix('spottingUtils')
 
 import typing
 if typing.TYPE_CHECKING:
@@ -20,7 +22,7 @@ if typing.TYPE_CHECKING:
   from typing import Tuple, Optional, List, Dict, Union
 
 
-SPOT_POINT_COLOR = (cssToHexColor("#0e9eff"), cssToHexColor("#4c95d4"))
+SPOT_POINT_COLOR = (cssToHexColor("#00aaff"), cssToHexColor("#5990bf"))
 MASK_POINT_COLOR = (cssToHexColor("#ff3135"), cssToHexColor("#ab6d67"))
 
 LINE_COLOR = cssToHexColor("#0e9eff")
@@ -61,22 +63,22 @@ class SpottingUtil(object):
 
     self.panel = panel
 
-    self.visibilityCheckpoints = self.panel.addCheckboxLine('Visibility checkpoints', onToggleCallback=self.onCheckboxToggle)
-    self.viewRangePorts = self.panel.addCheckboxLine('View range ports', onToggleCallback=self.onCheckboxToggle)
-    self.showBBoxes = self.panel.addCheckboxLine('Show BBox', onToggleCallback=self.onCheckboxToggle)
-    self.showBBoxAlign = self.panel.addCheckboxLine('  BBox align', onToggleCallback=self.onCheckboxToggle)
+    self.visibilityCheckpoints = self.panel.addCheckboxLine(t('visibilityCheckpoints'), onToggleCallback=self.onCheckboxToggle)
+    self.viewRangePorts = self.panel.addCheckboxLine(t('viewRangePorts'), onToggleCallback=self.onCheckboxToggle)
+    self.showBBoxes = self.panel.addCheckboxLine(t('showBBox'), onToggleCallback=self.onCheckboxToggle)
+    self.showBBoxAlign = self.panel.addCheckboxLine(t('bboxAlign'), onToggleCallback=self.onCheckboxToggle)
 
-    self.panel.addHeaderLine('Rays')
-    self.ownSpotRays = self.panel.addCheckboxLine('OWN spot rays')
-    self.ownMaskRays = self.panel.addCheckboxLine('OWN mask rays')
+    self.panel.addHeaderLine(t('rays'))
+    self.ownSpotRays = self.panel.addCheckboxLine(t('ownSpotRays'))
+    self.ownMaskRays = self.panel.addCheckboxLine(t('ownMaskRays'))
 
-    self.allySpotRays = self.panel.addCheckboxLine('ALL spot rays')
-    self.allyMaskRays = self.panel.addCheckboxLine('ALL mask rays')
+    self.allySpotRays = self.panel.addCheckboxLine(t('allSpotRays'))
+    self.allyMaskRays = self.panel.addCheckboxLine(t('allMaskRays'))
 
     self.panel.addSeparatorLine()
-    self.distanceText = self.panel.addCheckboxLine('Min distance text')
-    self.nearestOnly = self.panel.addCheckboxLine('Nearest only')
-    self.nonDirectRays = self.panel.addCheckboxLine('Show non direct')
+    self.distanceText = self.panel.addCheckboxLine(t('minDistanceText'))
+    self.nearestOnly = self.panel.addCheckboxLine(t('nearestOnly'))
+    self.nonDirectRays = self.panel.addCheckboxLine(t('showNonDirect'))
     
 
     drawer.onBeforeDraw += self.update

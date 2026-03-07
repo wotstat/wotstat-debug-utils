@@ -13,6 +13,8 @@ import Math
 
 from ....Logger import Logger
 from .utils import Shot
+from ....i18n import prefix
+t = prefix('shootingUtils.projectile')
 
 import typing
 if typing.TYPE_CHECKING:
@@ -80,21 +82,21 @@ class ProjectileUtil(CallbackDelayer):
     self.showStartMarker = True
 
     self.panel = panel
-    self.header = self.panel.addHeaderLine('Projectile')
-    self.panel.addCheckboxLine('Trajectory', self.trajectoryEnabled, self.onTrajectoryToggle)
+    self.header = self.panel.addHeaderLine(t('projectile'))
+    self.panel.addCheckboxLine(t('trajectory'), self.trajectoryEnabled, self.onTrajectoryToggle)
 
-    self.panel.addCheckboxLine('  1Tick interval', self.oneTickInterval, self.onOneTickIntervalToggle)
-    self.panel.addCheckboxLine('  Continuous trajectory', self.continuousTrajectory, self.onContinuousTrajectoryToggle)
+    self.panel.addCheckboxLine(t('oneTickInterval'), self.oneTickInterval, self.onOneTickIntervalToggle)
+    self.panel.addCheckboxLine(t('continuousTrajectory'), self.continuousTrajectory, self.onContinuousTrajectoryToggle)
     if not BattleReplay.isPlaying():
-      self.panel.addCheckboxLine('  Shoot marker', self.showStartMarker, self.onStartMarkerToggle)
+      self.panel.addCheckboxLine(t('shootMarker'), self.showStartMarker, self.onStartMarkerToggle)
 
-    self.panel.addCheckboxLine('  End marker', self.showEndMarker, self.onEndMarkerToggle)
+    self.panel.addCheckboxLine(t('endMarker'), self.showEndMarker, self.onEndMarkerToggle)
 
-    self.panel.addCheckboxLine('  Bullet marker', self.showBulletMarker, self.onShowBulletMarkerToggle)
-    self.compensatedTicksLine = self.panel.addNumberInputLine('  Compensate ticks', value=self.compensatedTicks, onChangeCallback=self.onCompensatedTicksChange)
+    self.panel.addCheckboxLine(t('bulletMarker'), self.showBulletMarker, self.onShowBulletMarkerToggle)
+    self.compensatedTicksLine = self.panel.addNumberInputLine(t('compensateTicks'), value=self.compensatedTicks, onChangeCallback=self.onCompensatedTicksChange)
 
-    self.durationLine = self.panel.addNumberInputLine('Duration', value=self.trajectoryDuration, onChangeCallback=self.onDurationChange)
-    
+    self.durationLine = self.panel.addNumberInputLine(t('duration'), value=self.trajectoryDuration, onChangeCallback=self.onDurationChange)
+
     onShowTracerEvent += self.handleShowTracerEvent
     onStopTracerEvent += self.handleStopTracerEvent
     onExplodeProjectileEvent += self.handleExplodeProjectileEvent

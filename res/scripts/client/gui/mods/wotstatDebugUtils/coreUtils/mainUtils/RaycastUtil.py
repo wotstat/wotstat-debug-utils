@@ -1,9 +1,8 @@
 import BigWorld, GUI, Math, math
 import Keys
-import time
 from gui import InputHandler
 from AvatarInputHandler import cameras
-from gui.debugUtils import ui, gizmos, drawer, NiceColors, NiceColorsHex
+from gui.debugUtils import ui, gizmos, drawer, NiceColors
 from helpers.CallbackDelayer import CallbackDelayer
 
 from helpers import dependency, isPlayerAvatar
@@ -12,6 +11,13 @@ from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
 
 from Vehicle import SegmentCollisionResultExt
 from ProjectileMover import EntityCollisionData
+
+from ...utils import cssToHexColor
+from ...i18n import prefix
+t = prefix('mainUtils.raycast')
+
+COLOR_RED = (cssToHexColor('#FF453A'), cssToHexColor('#E0C4C3'))
+COLOR_GREEN = (cssToHexColor('#30D158'), cssToHexColor('#757C77'))
 
 try: 
   from shared_utils.vehicle_utils import getMatinfo
@@ -66,13 +72,11 @@ class RaycastUtil(CallbackDelayer):
 
     self.panel = panel
     self.showMatInfo = False
-    self.lineIs3D = False
-    self.serverTime = self.panel.addValueLine('Server time', value='0.0')
-    self.header = self.panel.addHeaderLine('Raycast')
-    self.distanceLine = self.panel.addValueLine('Cursor distance', value='0')
-    self.raycastLine = self.panel.addCheckboxLine('Raycast line (MMB)', onToggleCallback=self.onRaycastToggle)
-    self.raycastMatInfo = self.panel.addCheckboxLine('  Mat info', onToggleCallback=self.onMatInfoToggle)
-    self.raycast3DLine = self.panel.addCheckboxLine('  Line 3D', onToggleCallback=self.on3DLineToggle)
+    self.serverTime = self.panel.addValueLine(t('serverTime'), value='0.0')
+    self.header = self.panel.addHeaderLine(t('raycast'))
+    self.distanceLine = self.panel.addValueLine(t('cursorDistance'), value='0')
+    self.raycastLine = self.panel.addCheckboxLine(t('raycastLine'), onToggleCallback=self.onRaycastToggle)
+    self.raycastMatInfo = self.panel.addCheckboxLine(t('materialInfo'), onToggleCallback=self.onMatInfoToggle)
     self.lines = [] # type: list[PolyLine]
     self.markers = [] # type: list[Marker]
     
@@ -86,7 +90,6 @@ class RaycastUtil(CallbackDelayer):
     self.clear()
     self.panel.removeLine(self.raycastLine)
     self.panel.removeLine(self.raycastMatInfo)
-    self.panel.removeLine(self.raycast3DLine)
 
   def update(self):
     self.serverTime.value = '%.3f' % BigWorld.serverTime()
@@ -131,10 +134,6 @@ class RaycastUtil(CallbackDelayer):
 
   def onMatInfoToggle(self, value):
     self.showMatInfo = value
-    self.render()
-
-  def on3DLineToggle(self, value):
-    self.lineIs3D = value
     self.render()
 
   def onRaycastToggle(self, value):
@@ -230,43 +229,11 @@ class RaycastUtil(CallbackDelayer):
     startPoint = self.lastStartPoint
     endPoint = self.lastEndPoint
 
-
-    if self.lineIs3D:
-      if len(segments) == 0:
-        "#E0C4C3"
-        self.lines.append(drawer.createLine(color=NiceColorsHex.RED, backColor=0xE0C4C3, p1=startPoint, p2=endPoint))
-      else:
-        "#757C77"
-        self.lines.append(drawer.createLine(color=NiceColorsHex.GREEN, backColor=0x757C77, p1=startPoint, p2=endPoint))
+    if len(segments) == 0:
+      self.lines.append(drawer.createLine(color=COLOR_RED[0], backColor=COLOR_RED[1], p1=startPoint, p2=endPoint))
     else:
-      farthestPoint = None
-      farthestDist = 0
-      
-      for pos, collision, seg in segments:
-        dist = (pos - startPoint).length
-        if dist > farthestDist:
-          farthestDist = dist
-          farthestPoint = pos
-      
-      lastPoint = startPoint
-      for pos, _, _ in segments:
-        if (lastPoint - pos).length < 0.01: continue
-        # line = drawer.createLine(color=NiceColors.GREEN if pos == farthestPoint else NiceColors.RED, p1=lastPoint, p2=pos, width=1)
-        line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN if farthestPoint else NiceColors.RED)
-        line.fromAutoSegments(lastPoint, pos)
-        self.lines.append(line)
-        lastPoint = pos
-        
-      if len(segments) > 0 and segments[-1][2] is not None and (lastPoint - endPoint).length < 0.01:
-        line = gizmos.createPolyLine(width=1, color=NiceColors.GREEN)
-        line.fromAutoSegments(lastPoint, endPoint)
-        self.lines.append(line)
-        
-      if len(segments) == 0:
-        line = gizmos.createPolyLine(width=1, color=NiceColors.RED)
-        line.fromAutoSegments(startPoint, endPoint)
-        self.lines.append(line)
-        
+      self.lines.append(drawer.createLine(color=COLOR_GREEN[0], backColor=COLOR_GREEN[1], p1=startPoint, p2=endPoint))
+    
     for pos, collision, seg in segments:
       dist = (pos - startPoint).length
       if seg:
