@@ -101,7 +101,7 @@ class BboxUtil(object):
 
     targetVehicles = [entity for entity in BigWorld.entities.values() if isinstance(entity, ClientSelectableCameraVehicle if self.showAny else HangarVehicle) and entity.appearance]
     for vehicle in targetVehicles:
-      if vehicle.typeDescriptor.hull.hitTester.bbox is None: 
+      if vehicle.typeDescriptor.hull.hitTester.bbox is None and vehicle.appearance.collisions is not None: 
         model_assembler.setupCollisions(vehicle.typeDescriptor, vehicle.appearance.collisions)
       self.lines.extend(drawVehicleBboxes(vehicle, backRender=self.backfaceVisibility))
 
