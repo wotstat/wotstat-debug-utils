@@ -1,115 +1,124 @@
+### | RU | [EN](./README_EN.md) |
+
 # WotStat Debug Utils
 
 > [!CAUTION]
-> Some features of the mod may provide an unfair advantage in battle. For that reason, the mod only works in `Replays`, `Training Rooms`, `Topography`, and the `Garage`. In competitive modes (`Random Battles`, `Clan Battles`, `Team Battles`), the mod is disabled.
+> Некоторые функции мода могут добавить нечестное преимущество в бою. Поэтому мод будет работать только в `Реплеях`, `Тренировочных боях`, `Топографии` и `Ангаре`. В соревновательных режимах (Случайные, Клановые, Командные бои) мод не будет работать.
 
-## Installation
-1. Download the mod file `wotstat.debug-utils_1.0.0.mtmod` and the helper library `net.openwg.gameface_1.0.0.mtmod`.
-2. Put both files into `Tanki/mods/{CURRENT_GAME_VERSION}/`.
-3. Launch the game and press `F2` to open the mod window.
+## Установка
+1. Скачайте файл мода `wotstat.debug-utils_1.0.0.mtmod` и служебную библиотеку `net.openwg.gameface_1.0.0.mtmod`.
+2. Поместите их в папку `Tanki/mods/{АКТУАЛЬНАЯ_ВЕРСИЯ_ИГРЫ}/`.
+3. Запустите игру и нажмите `F2` для открытия окна мода.
 
-![Mod window example](.github/assets/main-en.png)
+![Пример окна мода](.github/assets/main-ru.png)
 
-## General mod functionality
-The mod window is divided into several sections.
+## Общий функционал мода
+Окно мода разделено не несколько разделов.
 
-### Main utils
-- `Server time` — displays the current server time in seconds (with three decimal places).
+### Основное
+- `Серверное время` – отображает текущее время сервера в секундах (три знака после запятой). 
 
 #### Raycast
-- `Cursor distance` — displays the distance from the camera to the point under the cursor.
-- `Raycast line (MMB)` — pressing the Middle Mouse Button (`MMB`) creates a line from the camera to the point under the cursor.
-  - `Mat info` — displays information about the surface hit by the ray, including the distance from the camera to that point, and if it is a tank, its armor and impact angle.
+- `Дистанция до курсора` – отображает расстояние от камеры до точки, на которую указывает курсор.
+- `Создавать линию (СКМ)` – при нажатии Средней Кнопки Мыши (СКМ) будет создаваться линия от камеры до точки, на которую указывает курсор.
+  - `Информация о поверхности` – отображает информацию о поверхности, которую пересекает луч, отображается расстояние от камеры до этой точки, и если это танк, то отображается броня и угол входа.
 
-![Raycast example](.github/assets/raycast.png)
+![Пример Raycast](.github/assets/raycast.png)
 
-#### Physics
-- `Static collision events` — displays collision events with various static objects (fallen trees, fences, rams) and the direction of the force slowing the tank within a small radius around it.
-  - `Info text` — displays textual collision information, including energy, damage, and flags.
-  - `From all` — displays collisions for all tanks on the map, not just your own. (Still works only within a small radius around your tank.)
-
-![Static collision events example](.github/assets/static-collision.png)
+#### Физика
+- `Столкновения со статикой` – отображает события столкновений с различными объектами (поломки деревьев, заборчиков, тараны) и направление силы которое замедляет танк в небольшом радиусе от танка.
+  - `Инфо текст` – отображает текстовую информацию о столкновении, энергию, урон и флаги.
+  - `Для всех танков` – отображает столкновения для всех танков на карте, а не только для вашего. (но работает всё ещё в небольшом радиусе от вашего танка)
+  
+![Пример столкновений со статикой](.github/assets/static-collision.png)
 
 #### BBox
-- `Show OWN bbox` — displays the bounding boxes of your tank’s components.
-- `Show ANY bbox` — displays the bounding boxes of all tanks’ components on the map.
-- `Backface visibility` — displays box lines even when they are behind other objects.
+- `Для своего танка` – отображает ограничивающий бокс для компонентов вашего танка.
+- `Для всех танков` – отображает ограничивающий бокс для компонентов всех танков на карте.
+- `Сквозная видимость` – отображает линии бокса даже если они находятся за другими объектами.
 
-![BBox example](.github/assets/bbox.png)
-- `Green` — tracks
-- `Yellow` — hull
-- `Cyan` — turret (rotates left/right)
-- `Purple` — gun (rotates up/down)
-- `Orange` — additional tracks (present on some tanks)
+![Пример BBox](.github/assets/bbox.png)
+- `Зелёный` – гусеницы
+- `Жёлтый` – корпус
+- `Голубой` – башня (то что вращается вправо-влево)
+- `Фиолетовый` – орудие (то что вращается вверх-вниз)
+- `Оранжевый` – дополнительные гусеницы (на некоторых танках)
 
-### Shooting utils
 
-#### Aiming
-- `Server aiming circle` — displays the actual dispersion circle at the aiming point (in 3D space). This marker shows the last valid value received from the server (without smoothing, at the actual tickrate frequency).
-  - `Trajectory` — displays the trajectory to the marker. (In replays it may not match exactly, since the marker position and trajectory are taken from different places.)
-- `Client aiming circle` — displays the dispersion circle at the aiming point calculated on the client (without smoothing).
-  - `Trajectory` — displays the trajectory to the marker.
-- `Continuous trajectory` — whether to continue the trajectory beyond the marker.
-- `Preserve on shot` — preserves markers and trajectories at the moment of the shot (when the tracer appears) for 5 seconds.
+### Стрельба
 
-![Aiming circles and trajectories example](.github/assets/aiming.png)
+#### Прицеливание
+- `Серверный маркер` – отображает фактический круг разброса в точке прицеливания (в 3D пространстве). Этот маркер отображает последнее актуальное значение пришедшее от сервера (без сглаживание, с фактической частотой тикрейта).
+  - `Траектория` – отображает траекторию к маркеру (в реплеях может не совпадать, тк позиция маркера и траектория берутся из разных мест).
+- `Клиентский маркер` – отображает круг разброса в точке прицеливания, который рассчитывается на клиенте (без сглаживания).
+  - `Траектория` – отображает траекторию к маркеру.
+- `Продолжать траекторию` – нужно ли продолжать траекторию за маркером.
+- `Сохранять после выстрела` – сохранять маркеры и траектории в момент выстрела (появление трассера) на 5 секунд.
 
-#### Projectile
-- `Trajectory` — displays the tracer trajectory.
-  - `1Tick interval` — displays a line from the current projectile position to its position 1 tick ahead (that is, where the projectile is on the server at that moment).
-  - `Continuous trajectory` — whether to continue the trajectory beyond the tracer end point.
-  - `Shoot marker` — displays a marker at the point where the shot request was sent to the server (after the tracer appears, a text label nearby shows the delay between sending the request and tracer appearance).
-  - `End marker` — displays a marker at the point where the projectile hit a surface or a tank. This marker also marks the end of the tracer trajectory.
-  - `Bullet marker` — displays the current projectile position starting from the moment the tracer appears. Note that it may differ significantly from the visual shell effect. The visual effect does not match either the real projectile position or its speed; it is attached to the gun barrel end and only tries to artistically represent the shell flight.
-- `Compensate ticks` — adds an offset of the specified number of ticks to the projectile along the trajectory. (For example, with a 1-tick delay, when the tracer appears, the projectile will be displayed at the position 1 tick after the start.)
-- `Duration` — how long the trajectory and shoot marker remain visible after the tracer appears.
 
-> Marker text format: `Event {distance along trajectory}m/{time along trajectory}s ({event time}s)`  
-> For example, `Hit 83.3m/0.220s (0.104s)` means that `0.104 seconds` have passed since the tracer appeared, and the point is located `83.3 meters` along the trajectory, which the projectile would travel in `0.220 seconds`.
+![Пример маркеров и траекторий](.github/assets/aiming.png)
 
-![Projectile example](.github/assets/shot.png)
+#### Выстрел
+- `Траектория` – отображает траекторию трассера.
+  - `Шаг в 1 тик` – отображает линию от текущей позиции снаряда к его позиции 1 тик вперёд (то есть то, где снаряд находится на сервер в этот момент).
+  - `Продолжать траекторию` – нужно ли продолжать траекторию после точки завершения трассера.
+  - `Маркер выстрела` – отображает маркер в точке, где запрос выстрела отправился на сервер (после появления трассера, рядом с маркером отображается текст с временем задержки между отправкой запроса и появлением трассера).
+  - `Маркер попадания` – отображает маркер в точке, где снаряд ударился о поверхность или попал в танк. Этот же маркер завершает траекторию трассера.
+  - `Маркер снаряда` – отображает текущее положение снаряда с момента появления трассера. Учтите, что он может существенно отличаться от визуального эффекта снаряда. Визуальный эффект не соответствует ни реальному положению снаряда ни его скорости, он привязывается к концу ствола и пытается художественно изобразить полёт снаряда.
+- `Сдвиг тиков` – добавляет отступ в указанное число тиков для снаряда на траектории. (Например при задержке в 1 тик, в момент появления трассера, снаряд будет отображаться на позиции через 1 тик от начала).
+- `Длительность` – длительность отображения траектории и маркера выстрела после появления трассера.
+
+> Формат текстов у маркера `Событие {дистанция по траектории}m/{время по траектории}s ({время события}s)`.  
+> То есть `Hit 83.3m/0.220s (0.104s)` означает, что с момента появления трассера прошло `0.104 секунды`, а точка находится на расстоянии `83.3 метра` по траектории, которую снаряд прошел бы за `0.220 секунд`.
+
+
+![Пример выстрела](.github/assets/shot.png)
 <details>
-<summary>Description of the situation in the screenshot</summary>
+<summary>Описание ситуации на скриншоте</summary>
 
-- the shot request was sent to the server `0.097 seconds` before the tracer appeared
-- `0.104 seconds` after the tracer appeared, hit information was received for a tank at a distance of `83.3 meters` along the trajectory from the shot point; this hit should occur after `0.220 seconds` of projectile flight. At the same moment, the hit result was received — ricochet
-- `0.199 seconds` after the tracer appeared, ricochet collision information was received for a wall at a distance of `25.2 meters` along the ricochet trajectory and `109.2 meters` including the projectile flight from the shot point
+- выстрел был отправлен на сервер за `0.097 секунд` до появления трассера
+- через `0.104 секунды` после появления трассера, пришла информация о попадании в танк на расстоянии `83.3 метра` по траектории от точки выстрела, это попадание должно случиться через `0.220` секунд полёта снаряда. И в этот же момент пришел результат попадания – рикошет
+- через `0.199 секунд` после появления трассера, пришла информация о столкновении рикошета со стеной на расстоянии `25.2 метра` по траектории рикошета и `109.2 метра` с учётом полёта снаряда от точки выстрела.
 
 </details>
 
-### Spotting utils
-- `View range ports` — displays the view range points of tanks used for spotting. They coincide with and overlap the visibility checkpoints.
-- `Visibility checkpoints` — displays the tank checkpoints used for spotting.
-- `Show BBox` — displays the bounding box used for the visibility checkpoints (the first 4 points are at the centers of the side faces, and the 5th point is at the center of the top face of the tank).
-  - `BBox align` — displays diagonal lines on the faces; their intersection marks the face center where the visibility checkpoint is located.
 
-![Visibility checkpoints example](.github/assets/spot-points.png)
 
-#### Rays
-- `OWN spot rays` — displays spotting rays from your tank to enemy visibility checkpoints.
-- `OWN mask rays` — displays camouflage rays from enemies to your tank’s visibility checkpoints.
-- `ALL spot rays` — displays spotting rays from all allies to all enemies.
-- `ALL mask rays` — displays camouflage rays from all enemies to all allies.
-- `Min distance text` — displays a text marker near each point showing the minimum ray distance originating from that point.
-- `Nearest only` — displays only rays that are the shortest for each tank pair. (For example, if you have 3 enemies, only 3 spotting rays from your tank to each enemy and 3 camouflage rays to your tank will be displayed.)
-- `Show non direct` — displays rays that intersect obstacles (such rays cannot spot a tank). These rays are displayed in a faded color.
+### Засвет
+- `Обзорные точки` – отображает обзорные точки танков, которые используются для засвета. Они также совпадают с габаритными и перекрывают их.
+- `Габаритные точки` – отображает габаритные точки танков, которые используются для засвета.
+- `Отображать BBox` – отображает ограничивающий бокс который используется для габаритных точек (первые 4 точки находятся на центрах боковых граней, а 5 точка находится на верхней грани по центру танка).
+  - `Привязка центров` – отображает диагональные линии на гранях, пересечение которых является центром грани, на котором находится габаритная точка.
 
-![Spotting rays example](.github/assets/spot-rays.png)
+![Пример габаритных точек](.github/assets/spot-points.png)
 
-### Replays utils
-- `Extend slow down` — adds slowdown steps of `1/32`, `1/64`, and `1/128` of real speed.
-- `Pause on OWN shot` — automatically pauses the replay when your tank fires.
-- `Pause on ANY shot` — automatically pauses the replay when any tank fires.
+#### Лучи
+- `Засвета СВОЕГО танка` - отображает обзорные лучи от вашего танка к габаритным точкам противников.
+- `Маскировки СВОЕГО танка` - отображает маскировочные лучи от противников к габаритным точкам вашего танка.
+- `Засвета ВСЕХ танков` - отображает обзорные лучи от всех союзников ко всем противникам.
+- `Маскировки ВСЕХ танков` - отображает маскировочные лучи от всех противников ко всем союзникам.
+- `Текст мин. дистанции` – рядом с каждой точкой отображает текстовый маркер с минимальной дистанцией луча выходящего из этой точки.
+- `Только кратчайшие лучи` – отображает только лучи, которые являются кратчайшими для каждой пары танков. (например, если у вас есть 3 противника, то будет отображаться только 3 обзорных луча от вашего танка к каждому противнику и 3 маскировочных луча к вашему)
+- `Отображать непрямые` – отображает лучи, которые пересекают препятствия (такие лучи не могут засветить танк). Эти лучи отображаются бледным цветом.
 
-### Free camera utils
-Works both in the Garage and in battle.
 
-- `Enable` — enables the free camera.
-- `Allow shooting` — allows firing the tank with `LMB` while free camera is enabled.
+![Пример обзорных лучей](.github/assets/spot-rays.png)
 
-The camera controls differ from the in-game free camera:
-- `WASD` — move the camera forward, left, backward, and right at the same height.
-- `Space` — move the camera up.
-- `Shift` — move the camera down.
-- `Z` — zoom in (changes camera FOV).
-- `Z + mouse wheel` — adjust zoom while zoomed in.
+### Реплеи
+- `Расширенное замедление` – добавляет шаги замедления в `1/32`, `1/64` и `1/128` от реальной скорости.
+- `Пауза на СВОЙ выстрел` – при выстреле вашего танка, реплей будет автоматически ставиться на паузу.
+- `Пауза на ЛЮБОЙ выстрел` – при выстреле любого танка, реплей будет автоматически ставиться на паузу.
+
+
+### Свободная камера
+Работает и в ангаре и в бою.
+
+- `Включить` – включает свободную камеру
+- `Разрешить стрельбу` – разрешает стрелять из танка на ЛКМ при включенной свободной камере.
+
+Управление камерой отличается от игровой свободной камеры:
+- `WASD` – перемещение камеры вперёд, влево, назад и вправо на одной высоте.
+- `Пробел` – перемещение камеры вверх.
+- `Shift` – перемещение камеры вниз.
+- `Z` – приближение (изменение FOV камеры).
+- `Z + колёсиком мышки` – изменение приближения во время зума.
