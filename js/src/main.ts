@@ -11,16 +11,21 @@ import { StatisticsPanel } from './ui/panels/StatisticsPanel'
 import { ReactiveModel } from './utils/ReactiveModel'
 import type { ModelValue } from './utils/types'
 import './utils/ResizeObserverPolyfill'
+import type { PanelModel } from './ui/panels/userPanel/UserPanel'
 
 console.warn('WotStat Debug Utils Mod - main.ts loaded')
 
-type Model = {
+export type Model = {
   game: 'wot' | 'mt'
   visible: boolean
   markers: Array<ModelValue<MarkerData>>
   lines: Array<ModelValue<SimpleLineData>>
   polyLines: Array<ModelValue<PolyLineData>>
   boxes: Array<ModelValue<BoxData>>
+  ui: {
+    showStatisticsPanel: boolean
+    panels: Array<ModelValue<PanelModel>>
+  }
 }
 
 
@@ -34,6 +39,7 @@ const statisticsPanel = new StatisticsPanel({
   onDebugColorizedLinesChange: (value) => debugColorizedLines = value
 })
 panelController.addPanel(statisticsPanel)
+statisticsPanel.setVisibility(false)
 
 const model = new ReactiveModel<Model>()
 model.subscribe('model')
@@ -41,6 +47,9 @@ model.watch(m => {
   panel.setVisible(m?.visible ?? false)
   if (m) root.classList.add(`game-${m.game}`)
 }, { immediate: true })
+
+model.subscribe('model.ui')
+model.watch(m => statisticsPanel.setVisibility(m?.ui?.showStatisticsPanel ?? false), { immediate: true })
 
 const userPanelsController = new UserPanelsController(panelController)
 

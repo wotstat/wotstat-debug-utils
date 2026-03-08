@@ -64,6 +64,9 @@ export class StatisticsPanel extends BasePanel {
     this.totalTimeHeader.textContent = '0ms'
   }
 
+  setVisibility(isVisible: boolean): void {
+    this.panelElement.style.display = isVisible ? 'block' : 'none'
+  }
 
   updateStatistics(stats: {
     totalTimeMs: number

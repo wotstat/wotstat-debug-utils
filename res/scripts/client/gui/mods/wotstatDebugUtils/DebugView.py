@@ -56,6 +56,10 @@ class DebugView(ViewImpl):
     if event.key == Keys.KEY_F2:
       self.visible = not self.visible
       self.viewModel.setVisible(self.visible)
+
+      if self.visible:
+        self.viewModel.getUi().showStatisticsPanel = BigWorld.isKeyDown(Keys.KEY_D)
+
       return True
     return False
 

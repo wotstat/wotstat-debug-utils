@@ -14,8 +14,8 @@ except ImportError: pass
 
 from .DebugView import WotstatDebugWindow, WOTSTAT_DEBUG_UTILS_VIEW
 from .Logger import Logger, SimpleLoggerBackend
+from gui.debugUtils import ui as uiController
 
-from .gizmos.models.LineModel import LineEnd
 from .coreUtils.mainUtils import MainUtils
 from .coreUtils.replaysUtils import ReplaysUtils
 from .coreUtils.freeCamera import FreeCameraUtils
@@ -61,108 +61,12 @@ class WotstatDebugUtils(object):
   def __handleKeyUpEvent(self, event):
     # type: (BigWorld.KeyEvent) -> None
 
-    if event.key == Keys.KEY_B:
-      self.showWindow()
-      
-    # from skeletons.gui.impl import IGuiLoader
-    # from helpers import dependency
-    # from openwg_gameface import res_id_by_key
-    # import Math
-    # uiLoader = dependency.instance(IGuiLoader)
-    # view = uiLoader.windowsManager.getViewByLayoutID(res_id_by_key('WOTSTAT_DEBUG_UTILS_VIEW')) # type: DebugView
-    # if not view: return
-    
-    # if event.key == Keys.KEY_4:
-    #   view.setupMarker(view.createMarker(), position=Math.Vector3(0, 0, 5), size=10, color="#77FF08", text='(0, 0, 0)')
-    # if event.key == Keys.KEY_5:
-    #   for y in range(20): view.setupMarker(view.createMarker(), position=Math.Vector3(5, y / 5.0, 5))
-    # elif event.key == Keys.KEY_6:
-    #   for y in range(20): 
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 5.0, 0))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 5.0, 5))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 5.0, 0))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 5.0, 5))
-    # elif event.key == Keys.KEY_7:
-    #   for y in range(40): 
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 5.0, 0))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 5.0, 5))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 5.0, 0))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 5.0, 5))
-    # elif event.key == Keys.KEY_8:
-      
-    #   form = "<div class='line'>m: {} <b>{}</b></div>"
-      
-    #   for y in range(20): 
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 3.0, 0), text=form.format(y * 4, '(0, %.2f, 0)' % (y / 3.0)))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(0, y / 3.0, 5), text=form.format(y * 4 + 1, '(0, %.2f, 5)' % (y / 3.0)))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 3.0, 0), text=form.format(y * 4 + 2, '(5, %.2f, 0)' % (y / 3.0)))
-    #     view.setupMarker(view.createMarker(), Math.Vector3(5, y / 3.0, 5), text=form.format(y * 4 + 3, '(5, %.2f, 5)' % (y / 3.0)))
-        
-    # elif event.key == Keys.KEY_9:
-      
-    #   for y in range(20): 
-    #     view.setupLine(view.createLine(), 
-    #       p1=Math.Vector3(0, y / 5.0, 0), 
-    #       p2=Math.Vector3(0, y / 5.0, 5), 
-    #       width=1,
-    #       color="#FF2A00"
-    #     )
-        
-    #     view.setupLine(view.createLine(), 
-    #       p1=Math.Vector3(0, y / 5.0, 5), 
-    #       p2=Math.Vector3(5, y / 5.0, 5), 
-    #       width=1,
-    #       color="#56F11D",
-    #       end1=LineEnd.ARROW if y % 4 == 0 else LineEnd.NONE,
-    #       end2=LineEnd.ARROW if y % 4 == 1 else LineEnd.NONE
-    #     )
-        
-    #     view.setupLine(view.createLine(),
-    #       p1=Math.Vector3(5, y / 5.0, 5), 
-    #       p2=Math.Vector3(5, y / 5.0, 0), 
-    #       width=1,
-    #       color="#1569EF"
-    #     )
-        
-    #     view.setupLine(view.createLine(),
-    #       p1=Math.Vector3(5, y / 5.0, 0), 
-    #       p2=Math.Vector3(0, y / 5.0, 0), 
-    #       width=2,
-    #       color="#F9F90D",
-    #       end1=LineEnd.ARROW if y % 4 == 0 else LineEnd.NONE,
-    #       end2=LineEnd.ARROW if y % 4 == 1 else LineEnd.NONE
-    #     )
-    
-    # elif event.key == Keys.KEY_0:
-    #   for y in range(10):
-    #     points = []
-    #     COUNT = 30
-    #     for r in range(COUNT):
-    #       angle = r * (2 * math.pi / COUNT)
-    #       x = 2.5 + 2.0 * math.cos(angle)
-    #       z = 2.5 + 2.0 * math.sin(angle)
-    #       points.append(Math.Vector3(x, y / 2.0, z))
-          
-    #     view.setupPolyLine(view.createPolyLine(),
-    #       points=points,
-    #       width=1,
-    #       color="rgb(%d, %d, %d)" % (25 * y, 255 - 25 * y, 100 + 15 * y),
-    #       closed=True
-    #     )
-        
-    # elif event.key == Keys.KEY_MINUS:
-    #   view.setupBox(
-    #     view.createBox(),
-    #     width=1,
-    #     color="#FF00FF",
-    #     center=Math.Vector3(2.5, 1.0, 2.5),
-    #     w=4.0,
-    #     h=2.0,
-    #     d=6.0,
-    #     rotationY=0.0,
-    #     rotationX=0,
-    #     rotationZ=0
-    #   )
+    # if event.key == Keys.KEY_F11:
+      # self.showWindow()uiController
+
+    pass
+    # if event.key == Keys.KEY_B:
+    #   self.showWindow()
     
   def showWindow(self):
     uiLoader = dependency.instance(IGuiLoader) # type: IGuiLoader

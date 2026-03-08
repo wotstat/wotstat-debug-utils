@@ -25,10 +25,10 @@ if typing.TYPE_CHECKING:
 SPOT_POINT_COLOR = (cssToHexColor("#00aaff"), cssToHexColor("#5990bf"))
 MASK_POINT_COLOR = (cssToHexColor("#ff3135"), cssToHexColor("#ab6d67"))
 
-LINE_COLOR = cssToHexColor("#0e9eff")
-LINE_COLOR = cssToHexColor("#ff3135")
-LINE_COLLIDE_COLOR = cssToHexColor("#738292")
-LINE_COLLIDE_COLOR = cssToHexColor("#917a76")
+SPOT_LINE_COLOR = cssToHexColor("#0e9eff")
+MASK_LINE_COLOR = cssToHexColor("#ff3135")
+SPOT_LINE_COLLIDE_COLOR = cssToHexColor("#738292")
+MASK_LINE_COLLIDE_COLOR = cssToHexColor("#917a76")
 
 SPOT_TEXT_COLOR = "#86cfff"
 MASK_TEXT_COLOR = "#ffb3b4"
@@ -208,7 +208,7 @@ class SpottingUtil(object):
 
           target = [min(group, key=lambda ray: ray.distance)] if self.nearestOnly.isChecked else group
           for ray in target:
-            rayColor = (LINE_COLOR, LINE_COLLIDE_COLOR) if not isVehiclePlayerTeam(ray.targetVehicle, ownTeam) else (LINE_COLOR, LINE_COLLIDE_COLOR)
+            rayColor = (SPOT_LINE_COLOR, SPOT_LINE_COLLIDE_COLOR) if not isVehiclePlayerTeam(ray.targetVehicle, ownTeam) else (MASK_LINE_COLOR, MASK_LINE_COLLIDE_COLOR)
             self.drawerable.append(drawer.createLine(points=[ray.source, ray.target], color=rayColor[0 if ray.isDirect else 1]))
 
             if self.distanceText.isChecked:

@@ -20,7 +20,7 @@ class UiController:
     # type: (DebugView) -> None
     self.currentDebugView = debugView
     
-    panels = debugView.viewModel.getUi().getPanels()
+    panels = debugView.viewModel.getUi().panels
     for panel in self.panels:
       panels.addViewModel(panel)
     panels.invalidate()
@@ -39,7 +39,7 @@ class UiController:
     
     panelIndex = self.panelIndexes.get(panel, None)
     if panelIndex is not None and self.currentDebugView:
-      panels = self.currentDebugView.viewModel.getUi().getPanels()
+      panels = self.currentDebugView.viewModel.getUi().panels
       panels.remove(panelIndex)
       panels.invalidate()
       self.panelsArray.remove(panelIndex)
@@ -57,7 +57,7 @@ class UiController:
     self.panelIndexes[panel] = len(self.panels) - 1
     
     if self.currentDebugView:
-      panels = self.currentDebugView.viewModel.getUi().getPanels()
+      panels = self.currentDebugView.viewModel.getUi().panels
       panels.addViewModel(panel)
       panels.invalidate()
       

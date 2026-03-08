@@ -1,14 +1,8 @@
 import { ReactiveModel } from '../../../utils/ReactiveModel'
-import type { ModelValue } from '../../../utils/types'
+import type { Model } from '../../../main'
 import { UserPanel, type PanelModel } from '../userPanel/UserPanel'
 import type { PanelController } from './PanelController'
 
-
-type Model = {
-  ui: {
-    panels: Array<ModelValue<PanelModel>>
-  }
-}
 
 export class UserPanelsController {
 
