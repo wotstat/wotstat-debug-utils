@@ -6,7 +6,7 @@
 > Некоторые функции мода могут добавить нечестное преимущество в бою. Поэтому мод будет работать только в `Реплеях`, `Тренировочных боях`, `Топографии` и `Ангаре`. В соревновательных режимах (Случайные, Клановые, Командные бои) мод не будет работать.
 
 ## Установка
-1. [Скачайте](https://github.com/wotstat/wotstat-debug-utils/releases/latest) файл мода `wotstat.debug-utils_1.0.0.mtmod` и служебную библиотеку `net.openwg.gameface_1.0.0.mtmod`.
+1. Скачайте файл мода [`wotstat.debug-utils_1.0.0.mtmod`](https://github.com/wotstat/wotstat-debug-utils/releases/latest) и служебную библиотеку [`net.openwg.gameface_1.1.6.mtmod`](https://gitlab.com/openwg/wot.gameface/-/releases).
 2. Поместите их в папку `Tanki/mods/{АКТУАЛЬНАЯ_ВЕРСИЯ_ИГРЫ}/`.
 3. Запустите игру и нажмите `F2` для открытия окна мода.
 
