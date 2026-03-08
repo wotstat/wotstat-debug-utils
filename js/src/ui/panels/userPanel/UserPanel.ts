@@ -14,6 +14,7 @@ import { ValueLine } from './lines/valueLine/ValueLine'
 export type PanelModel = {
   name: string
   lines: Array<ModelValue<LineModel>>
+  enabled: boolean
 }
 
 type LineType = LineModel['type']
@@ -37,6 +38,7 @@ export class UserPanel extends BasePanel {
   }
 
   updateModel(model: PanelModel) {
+    this.panelElement.classList.toggle('disabled', !model.enabled)
     for (let i = 0; i < model.lines.length; i++) {
       const lineModel = model.lines[i].value
       if (!this.lines.has(model.lines[i].id)) {

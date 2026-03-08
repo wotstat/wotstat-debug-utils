@@ -136,7 +136,7 @@ RU = {
 class I18n(Singleton):
   @staticmethod
   def instance():
-      return I18n()
+    return I18n()
 
   def __init__(self):
     language = getClientLanguage()

@@ -13,6 +13,7 @@ import Math
 
 from ....Logger import Logger
 from .utils import Shot
+from ....Restriction import allowed
 from ....i18n import prefix
 t = prefix('shootingUtils.projectile')
 
@@ -153,6 +154,8 @@ class ProjectileUtil(CallbackDelayer):
     self.shots.clear()
 
   def update(self):
+    if not allowed(): return 0
+
     for shotID, shot in list(self.shots.items()):
       shot.update()
 
@@ -186,6 +189,7 @@ class ProjectileUtil(CallbackDelayer):
       shot.dispose()
 
   def handleTriggerShootEvent(self, *a, **k):
+    if not allowed(): return
     vehicle = BigWorld.entity(BigWorld.player().playerVehicleID) # type: Vehicle
     gunPos, _ = getVehicleShootingPositions(vehicle)
     if self.lastStartShootMarker:
@@ -196,6 +200,8 @@ class ProjectileUtil(CallbackDelayer):
     self.lastStartShootMarker = (BigWorld.time(), gunPos, marker)
 
   def handleShowTracerEvent(self, obj, *a, **k):
+    if not allowed(): return
+
     if not self.trajectoryEnabled and not self.showBulletMarker:
       return
     
@@ -229,12 +235,16 @@ class ProjectileUtil(CallbackDelayer):
     BigWorld.callback(self.trajectoryDuration, lambda: self.disposeShot(shotID))
 
   def handleStopTracerEvent(self, obj, shotID, endPoint):
+    if not allowed(): return
+
     logger.info('ProjectileUtil: stopTracerEvent: shotID=%d, endPoint=%s' % (shotID, endPoint))
     shot = self.shots.get(shotID)
     if shot is not None:
       shot.addEndPoint(endPoint)
 
   def handleExplodeProjectileEvent(self, obj, *a, **k):
+    if not allowed(): return
+
     if len(a) == 10:
       shotID, effectsIndex, prefabEffIndex, effectMaterialIndex, shellTypeIdx, shellCaliber, endPoint, velocityDir, speed, damagedDestructibles = a
     elif len(a) == 6:

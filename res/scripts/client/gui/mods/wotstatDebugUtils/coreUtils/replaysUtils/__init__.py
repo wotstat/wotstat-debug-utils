@@ -4,6 +4,7 @@ from BattleReplay import g_replayCtrl # type: BattleReplay.BattleReplay
 
 from Event import SafeEvent
 from Avatar import PlayerAvatar
+from ...Restriction import Restriction
 from ...i18n import prefix, t as tr
 t = prefix('replaysUtils')
 
@@ -39,9 +40,13 @@ class ReplaysUtils(object):
 
     self.onSlowDownToggle(True)
     onShowTracerEvent += self.onShowTracer
+    Restriction.instance().onRestrictionChange += self.onRestrictionChange
 
   def onPauseOnOwnShotToggle(self, isEnabled):
     self.pauseOnOwnShot = isEnabled
+
+  def onRestrictionChange(self, allowed):
+    self.panel.enabled = allowed
 
   def onPauseOnEnemyShotToggle(self, isEnabled):
     self.pauseOnEnemyShot = isEnabled

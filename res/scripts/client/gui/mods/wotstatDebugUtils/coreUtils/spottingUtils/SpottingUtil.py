@@ -9,7 +9,7 @@ from gui.debugUtils import drawer, gizmos
 from gui.battle_control import avatar_getter
 from collections import OrderedDict
 
-
+from ...Restriction import allowed
 from ...utils import cssToHexColor
 from ...i18n import prefix
 t = prefix('spottingUtils')
@@ -97,11 +97,11 @@ class SpottingUtil(object):
     arena = avatar_getter.getArena()
     if not arena: return
 
-    vehicles = arena.vehicles.keys()
-
-    targetVehicles = [BigWorld.entities.get(vehicleID) for vehicleID in vehicles if isinstance(BigWorld.entities.get(vehicleID), Vehicle)]
-
     self.hideBboxes()
+    if not allowed(): return
+
+    vehicles = arena.vehicles.keys()
+    targetVehicles = [BigWorld.entities.get(vehicleID) for vehicleID in vehicles if isinstance(BigWorld.entities.get(vehicleID), Vehicle)]
     self.draw(targetVehicles)
 
   def hideBboxes(self):

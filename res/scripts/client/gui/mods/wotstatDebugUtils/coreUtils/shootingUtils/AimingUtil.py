@@ -10,6 +10,7 @@ from PlayerEvents import g_playerEvents
 from ...utils import cssToHexColor
 from .BallisticTrajectory import BallisticTrajectory
 from ...Logger import Logger
+from ...Restriction import allowed
 from ...i18n import prefix
 t = prefix('shootingUtils.aiming')
 
@@ -181,7 +182,7 @@ class AimingUtil(object):
 
   def onUpdateGunMarker(self, obj, vehicleID, shotPos, shotVec, dispersionAngle, *a, **k):
     # type: (AimingUtil, PlayerAvatar, int, Vector3, Vector3, float, Tuple, dict) -> None
-
+    if not allowed(): return
     if not obj.gunRotator: return
 
     if not self.showServerTrajectory or not self.showServerCircle:
@@ -209,6 +210,7 @@ class AimingUtil(object):
   
   def onUpdateGunMarkerClient(self, obj, *a, **k):
     # type: (VehicleGunRotator, Tuple, dict) -> None
+    if not allowed(): return
 
     if not self.showClientTrajectory or not self.showClientCircle:
       self.clientTrajectory.points = []
@@ -236,6 +238,8 @@ class AimingUtil(object):
         self.afterClientTrajectory.points = afterTrajectoryPoints
 
   def onShowTracerEvent(self, obj, attackerID, *a, **k):
+    if not allowed(): return
+
     if attackerID != BigWorld.player().playerVehicleID:
       return
     

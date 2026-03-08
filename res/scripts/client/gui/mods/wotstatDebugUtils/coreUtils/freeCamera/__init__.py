@@ -12,6 +12,7 @@ from PlayerEvents import g_playerEvents
 from .FreeCamera import WotstatFreeCameraController, WotstatFreeCameraHangarController
 import typing
 from helpers import isPlayerAvatar
+from ...Restriction import Restriction
 from ...i18n import prefix, t as tr
 t = prefix('freeCamera')
 
@@ -40,6 +41,7 @@ class FreeCameraUtils(object):
     self.hangarCameraController = WotstatFreeCameraHangarController()
 
     g_playerEvents.onAvatarBecomeNonPlayer += self.onAvatarBecomeNonPlayer
+    Restriction.instance().onRestrictionChange += self.onRestrictionChange
     self.enabled = False
     self.activeController = None
 
@@ -67,7 +69,6 @@ class FreeCameraUtils(object):
       return True
     
     return False
-    
 
   def handleKeyEvent(self, event):
     # type: (BigWorld.KeyEvent) -> bool
@@ -144,6 +145,14 @@ class FreeCameraUtils(object):
   def onAvatarBecomeNonPlayer(self):
     if self.enabled: 
       self.enableGameCamera(False)
+      self.enabledCheckbox.isChecked = False
+
+  def onRestrictionChange(self, allowed):
+    self.panel.enabled = allowed
+
+    if not allowed and self.enabled:
+      self.enableGameCamera(False)
+      self.enableHangarCamera(False)
       self.enabledCheckbox.isChecked = False
 
 oldSetCameraSettings = MouseSetting._set

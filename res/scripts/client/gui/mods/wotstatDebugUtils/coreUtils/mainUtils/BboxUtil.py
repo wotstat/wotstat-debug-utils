@@ -9,6 +9,8 @@ from Vehicle import Vehicle
 from gui.debugUtils import drawer
 from gui.battle_control import avatar_getter
 
+from ...Restriction import allowed
+
 import typing
 if typing.TYPE_CHECKING:
   from ...drawer.DrawerController import LineModel
@@ -72,6 +74,7 @@ class BboxUtil(object):
     self.lines = []
 
   def update(self):
+    if not allowed(): return
     if not self.showOwn and not self.showAny: return
     isInHangar = self.hangarSpace and self.hangarSpace.spaceID is not None
     if isInHangar: return
@@ -106,6 +109,9 @@ class BboxUtil(object):
       if vehicle.typeDescriptor.hull.hitTester.bbox is None and vehicle.appearance.collisions is not None: 
         model_assembler.setupCollisions(vehicle.typeDescriptor, vehicle.appearance.collisions)
       self.lines.extend(drawVehicleBboxes(vehicle, backRender=self.backfaceVisibility))
+      
+  def cleanup(self):
+    self.hideBboxes()
 
 def drawBbox(bbox, matrix=Matrix(), color=0xFFFFFF00, backColor=0xFFFFFF00):
   # type: (Tuple[Vector3, Vector3, float], Matrix, int, int) -> List[LineModel]

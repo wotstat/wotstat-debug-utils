@@ -11,7 +11,7 @@ from .NumberInputLine import NumberInputLine
 from typing import Callable
 
 class Panel(ViewModel):
-  def __init__(self, name, properties=1, commands=0):
+  def __init__(self, name, properties=2, commands=0):
     # type: (str, int, int) -> None
     self.defaultName = name
     super(Panel, self).__init__(properties=properties, commands=commands)
@@ -21,6 +21,7 @@ class Panel(ViewModel):
     super(Panel, self)._initialize()
     self._addStringProperty('name', self.defaultName)
     self._addArrayProperty('lines', Array[Line]())
+    self._addBoolProperty('enabled', True)
 
   @property
   def name(self):
@@ -41,6 +42,16 @@ class Panel(ViewModel):
   def lines(self, value):
     # type: (Array) -> None
     self._setArray(1, value)
+  
+  @property
+  def enabled(self):
+    # type: () -> bool
+    return self._getBool(2)
+  
+  @enabled.setter
+  def enabled(self, value):
+    # type: (bool) -> None
+    self._setBool(2, value)
   
   def _addLine(self, line):
     # type: (Line) -> None

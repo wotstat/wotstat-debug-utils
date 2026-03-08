@@ -12,6 +12,8 @@ if typing.TYPE_CHECKING:
 from ...i18n import prefix
 t = prefix('mainUtils.physics')
 
+from ...Restriction import allowed
+
 onStaticCollisionEvent = SafeEvent()
 oldOnStaticCollision = Vehicle.onStaticCollision
 def onStaticCollision(*a, **k):
@@ -50,6 +52,7 @@ class PhysicsUtil(object):
     self.showFromAll = value
     
   def handleStaticCollisionEvent(self, vehicle, energy, point, normal, miscFlags, damage, destrEffectIdx, destrMaxHealth):
+    if not allowed(): return
     
     if not self.showStaticCollisionEvents: return
     

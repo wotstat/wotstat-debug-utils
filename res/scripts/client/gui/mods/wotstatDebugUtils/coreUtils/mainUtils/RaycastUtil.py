@@ -12,6 +12,7 @@ from ClientSelectableCameraVehicle import ClientSelectableCameraVehicle
 from Vehicle import SegmentCollisionResultExt
 from ProjectileMover import EntityCollisionData
 
+from ...Restriction import allowed
 from ...utils import cssToHexColor
 from ...i18n import prefix
 t = prefix('mainUtils.raycast')
@@ -91,6 +92,9 @@ class RaycastUtil(CallbackDelayer):
     self.panel.removeLine(self.raycastLine)
     self.panel.removeLine(self.raycastMatInfo)
 
+  def cleanup(self):
+    self.clear()
+
   def update(self):
     self.serverTime.value = '%.3f' % BigWorld.serverTime()
 
@@ -155,6 +159,8 @@ class RaycastUtil(CallbackDelayer):
   
   def handleKeyUpEvent(self, event):
     # type: (BigWorld.KeyEvent) -> None
+    if not allowed(): return
+
     if event.key != Keys.KEY_MIDDLEMOUSE: return
     self.raycast()
 
