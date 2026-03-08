@@ -4,7 +4,7 @@
 # WotStat Debug Utils
 
 > [!CAUTION]
-> Some features of the mod may provide an unfair advantage in battle. For that reason, the mod only works in `Replays`, `Training Rooms`, `Topography`, and the `Garage`. In competitive modes (`Random Battles`, `Clan Battles`, `Team Battles`), the mod is disabled.
+> Some mod features may provide an unfair combat advantage. For that reason, the mod only works in `Replays`, `Training Rooms`, `Topography`, and the `Garage`. In competitive modes (`Random Battles`, `Clan Battles`, `Team Battles`), the mod is disabled.
 
 ## Installation
 1. Download the mod file [`wotstat.debug-utils_1.0.0.wotmod`](https://github.com/wotstat/wotstat-debug-utils/releases/latest) and the helper library [`net.openwg.gameface_1.1.6.wotmod`](https://gitlab.com/openwg/wot.gameface/-/releases).
