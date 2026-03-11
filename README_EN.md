@@ -83,8 +83,21 @@ The mod window is divided into several sections.
 ### Spotting utils
 - `View range ports` — displays the view range points of tanks used for spotting. They coincide with and overlap the visibility checkpoints.
 - `Visibility checkpoints` — displays the tank checkpoints used for spotting.
-- `Show BBox` — displays the bounding box used for the visibility checkpoints (the first 4 points are at the centers of the side faces, and the 5th point is at the center of the top face of the tank).
-  - `BBox align` — displays diagonal lines on the faces; their intersection marks the face center where the visibility checkpoint is located.
+- `Show BBox` — displays the bounding box used for the vehicle’s bounding points.
+  - `Guide lines` — displays the guide lines along which the bounding points are placed.
+
+> [!NOTE]
+> **Five bounding points:**
+> 1. On the gun elevation axis with the turret at zero rotation (the mounting point is not always inside the mantlet)
+> 2. The center of the front face of the hull BBox
+> 3. The center of the rear face of the hull BBox
+> 4. The center of the left face of the hull BBox, raised to the height of the first point
+> 5. The center of the right face of the hull BBox, raised to the height of the first point
+>
+> **Two view/bounding points:**
+> 1. At the tank’s PivotPoint, raised to the height of the BBox around the turret and hull (ignoring the gun, even on vehicles where the turret is effectively the gun)
+> 2. At the same location as the first bounding point, but taking turret rotation into account. (**dynamic**)
+
 
 ![Visibility checkpoints example](.github/assets/spot-points.png)
 
