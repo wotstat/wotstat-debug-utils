@@ -12,4 +12,3 @@ class SpottingUtils(object):
 
   def onRestrictionChange(self, allowed):
     self.panel.enabled = allowed
-    self.spottingUtil.allowed = allowed

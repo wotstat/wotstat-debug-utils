@@ -8,6 +8,7 @@ from Vehicle import Vehicle
 from gui.debugUtils import drawer, gizmos
 from gui.battle_control import avatar_getter
 from collections import OrderedDict
+from gui.debugUtils import ui
 
 from ...Restriction import allowed
 from ...utils import cssToHexColor
@@ -32,6 +33,9 @@ MASK_LINE_COLLIDE_COLOR = cssToHexColor("#917a76")
 
 SPOT_TEXT_COLOR = "#86cfff"
 MASK_TEXT_COLOR = "#ffb3b4"
+
+WHITE_COLOR = cssToHexColor("#ffffff")
+GREY_COLOR = (cssToHexColor("#959595"), cssToHexColor("#646464"))
 
 MAX_RAY_DISTANCE_SQR = 455 ** 2
 
@@ -80,7 +84,6 @@ class SpottingUtil(object):
     self.nearestOnly = self.panel.addCheckboxLine(t('nearestOnly'))
     self.nonDirectRays = self.panel.addCheckboxLine(t('showNonDirect'))
     
-
     drawer.onBeforeDraw += self.update
     self.hangarSpace.onVehicleChanged += self.updateHangarVehicle
 
@@ -133,25 +136,60 @@ class SpottingUtil(object):
     for vehicle in sortedVehicles:
       matrix = Matrix(vehicle.matrix) # type: Matrix
 
-      spotBbox = getVehicleVisibilityBbox(vehicle)
+      spotBbox, hullBbox = getVehicleVisibilityBbox(vehicle)
+      maskPoints, spotPoints = getMaskSpotPoints(vehicle, spotBbox, hullBbox)
       
       if self.showBBoxes.isChecked:
-        segments, crosses = getBboxSegments(*spotBbox)
+        segments, crosses = getBboxSegments(*hullBbox)
+        bboxPoints = getBboxPoints(*extendBbox(hullBbox, (hullBbox[0], Vector3(hullBbox[0].x, spotBbox[1].y, hullBbox[0].z))))
+        self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [
+          bboxPoints[2], bboxPoints[6], bboxPoints[5], bboxPoints[1], bboxPoints[2]
+        ]], color=WHITE_COLOR))
 
         for seg in segments:
-          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in seg], color=0xFFFFFF))
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in seg], color=WHITE_COLOR))
       
         if self.showBBoxAlign.isChecked:
           for cross in crosses:
-            self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in cross], color=0xcecece))
+            self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in cross], color=GREY_COLOR[0]))
+
+          typeDescr = vehicle.typeDescriptor
+          gunPos = typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0] + typeDescr.turret.gunPosition
+          center = (spotBbox[0] + spotBbox[1]) * 0.5
+          hullCenter = (hullBbox[0] + hullBbox[1]) * 0.5
+
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [
+            Vector3(hullBbox[0].x, hullCenter.y, hullCenter.z),
+            Vector3(hullBbox[0].x, gunPos.y, hullCenter.z),
+            Vector3(hullBbox[0].x, gunPos.y, gunPos.z),
+          ]], color=GREY_COLOR[0]))
+
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [
+            Vector3(hullBbox[0].x, gunPos.y, gunPos.z),
+            Vector3(hullBbox[1].x, gunPos.y, gunPos.z),
+          ]], color=GREY_COLOR[0], backColor=GREY_COLOR[1]))
+
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [
+            Vector3(hullBbox[1].x, gunPos.y, gunPos.z),
+            Vector3(hullBbox[1].x, gunPos.y, hullCenter.z),
+            Vector3(hullBbox[1].x, hullCenter.y, hullCenter.z),
+          ]], color=GREY_COLOR[0]))
+
+          self.drawerable.append(drawer.createLine(points=[
+            matrix.applyPoint(Vector3(center.x, spotBbox[1].y, center.z)),
+            maskPoints[5],
+            matrix.applyPoint(Vector3(0, 0, 0)),
+          ], color=GREY_COLOR[0]))
+
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [bboxPoints[2], bboxPoints[5]]], color=GREY_COLOR[0]))
+          self.drawerable.append(drawer.createLine(points=[matrix.applyPoint(p) for p in [bboxPoints[1], bboxPoints[6]]], color=GREY_COLOR[0]))
 
       if self.viewRangePorts.isChecked or \
         self.visibilityCheckpoints.isChecked or \
         self.ownMaskRays.isChecked or self.ownSpotRays.isChecked or \
         self.allyMaskRays.isChecked or self.allySpotRays.isChecked:
 
-        maskPoints, spotPoints = getMaskSpotPoints(vehicle, spotBbox)
-
+        maskPoints, spotPoints = getMaskSpotPoints(vehicle, spotBbox, hullBbox)
         vehiclePoints[vehicle] = {
           'mask': maskPoints,
           'spot': spotPoints,
@@ -253,9 +291,9 @@ class SpottingUtil(object):
     
     return rays
 
-def getBboxSegments(bboxMin, bboxMax):
-  # type: (Vector3, Vector3) -> Tuple[List[List[Vector3]], List[List[Vector3]]]
-  points = [
+def getBboxPoints(bboxMin, bboxMax):
+  # type: (Vector3, Vector3) -> List[Vector3]
+  return [
     Vector3(bboxMin.x, bboxMin.y, bboxMin.z),
     Vector3(bboxMin.x, bboxMax.y, bboxMin.z),
     Vector3(bboxMin.x, bboxMax.y, bboxMax.z),
@@ -265,6 +303,10 @@ def getBboxSegments(bboxMin, bboxMax):
     Vector3(bboxMax.x, bboxMax.y, bboxMax.z),
     Vector3(bboxMax.x, bboxMin.y, bboxMax.z),
   ]
+
+def getBboxSegments(bboxMin, bboxMax):
+  # type: (Vector3, Vector3) -> Tuple[List[List[Vector3]], List[List[Vector3]]]
+  points = getBboxPoints(bboxMin, bboxMax)
 
   segments = [
     [0, 1, 2, 3, 0, 4, 7, 3],
@@ -276,7 +318,6 @@ def getBboxSegments(bboxMin, bboxMax):
   crosses = [
     [0, 2, 7, 5, 0],
     [4, 1, 3, 6, 4],
-    [2, 5], [1, 6]
   ]
 
   return ([[points[i] for i in seg] for seg in segments], [[points[i] for i in seg] for seg in crosses])
@@ -289,17 +330,19 @@ def extendBbox(bbox1, bbox2):
   newMax = Vector3(max(max1.x, max2.x), max(max1.y, max2.y), max(max1.z, max2.z))
   return newMin, newMax
 
-def getVehicleVisibilityBbox(vehicle):
-  # type: (Vehicle) -> Tuple[Vector3, Vector3]
+def getVehicleVisibilityBbox(vehicle, respectGun=False):
+  # type: (Vehicle, bool) -> Tuple[Vector3, Vector3]
   typeDescr = vehicle.typeDescriptor
 
   result = None # type: Optional[Tuple[Vector3, Vector3]]
+  hullResult = None # type: Optional[Tuple[Vector3, Vector3]]
   
   hullBbox = typeDescr.hull.hitTester.bbox
   if hullBbox:
     hullBboxMin, hullBboxMax, _ = hullBbox
     hullOffset = typeDescr.chassis.hullPosition
     result = extendBbox(result, (hullBboxMin + hullOffset, hullBboxMax + hullOffset))
+    hullResult = extendBbox(hullResult, (hullBboxMin + hullOffset, hullBboxMax + hullOffset))
 
   turretBbox = typeDescr.turret.hitTester.bbox
   if turretBbox:
@@ -307,32 +350,34 @@ def getVehicleVisibilityBbox(vehicle):
     turretOffset = typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0]
     result = extendBbox(result, (turretBboxMin + turretOffset, turretBboxMax + turretOffset))
 
-  # gunBbox = typeDescr.gun.hitTester.bbox
-  # if gunBbox:
-  #   gunOffset = typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0] + typeDescr.turret.gunPosition
+  if respectGun:
+    gunBbox = typeDescr.gun.hitTester.bbox
+    if gunBbox:
+      gunOffset = typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0] + typeDescr.turret.gunPosition
 
-  #   gunBboxMin = Vector3(gunBbox[0]) + gunOffset
-  #   gunBboxMax = Vector3(gunBbox[1]) + gunOffset
-  #   gunBboxMin.z = gunBboxMax.z = result[0].z
+      gunBboxMin = Vector3(gunBbox[0]) + gunOffset
+      gunBboxMax = Vector3(gunBbox[1]) + gunOffset
+      gunBboxMin.z = gunBboxMax.z = result[0].z
 
-  #   result = extendBbox(result, (gunBboxMin, gunBboxMax))
+      result = extendBbox(result, (gunBboxMin, gunBboxMax))
 
-  return result
-  
-def getMaskSpotPoints(vehicle, spotBbox):
-  # type: (Vehicle, Tuple[Vector3, Vector3]) -> Tuple[List[Vector3], List[Vector3]]
+  return result, hullResult
+
+def getMaskSpotPoints(vehicle, spotBbox, hullBbox):
+  # type: (Vehicle, Tuple[Vector3, Vector3], Tuple[Vector3, Vector3]) -> Tuple[List[Vector3], List[Vector3]]
   typeDescr = vehicle.typeDescriptor
   matrix = Matrix(vehicle.matrix) # type: Matrix
   spotPoints = []
   maskPoints = []
 
   # center of each side spotBbox is mask
-  center = (spotBbox[0] + spotBbox[1]) * 0.5
-  maskPoints.append(Vector3(center.x, center.y, spotBbox[0].z))
-  maskPoints.append(Vector3(center.x, center.y, spotBbox[1].z))
-  maskPoints.append(Vector3(spotBbox[0].x, center.y, center.z))
-  maskPoints.append(Vector3(spotBbox[1].x, center.y, center.z))
-  maskPoints.append(typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0] + typeDescr.turret.gunPosition)
+  center = (hullBbox[0] + hullBbox[1]) * 0.5
+  gunPos = typeDescr.chassis.hullPosition + typeDescr.hull.turretPositions[0] + typeDescr.turret.gunPosition
+  maskPoints.append(Vector3(center.x, center.y, hullBbox[0].z))
+  maskPoints.append(Vector3(center.x, center.y, hullBbox[1].z))
+  maskPoints.append(Vector3(hullBbox[0].x, gunPos.y, center.z))
+  maskPoints.append(Vector3(hullBbox[1].x, gunPos.y, center.z))
+  maskPoints.append(gunPos)
   maskPoints = [matrix.applyPoint(point) for point in maskPoints]
 
   bboxTopPoint = matrix.applyPoint(Vector3(0, spotBbox[1].y, 0))

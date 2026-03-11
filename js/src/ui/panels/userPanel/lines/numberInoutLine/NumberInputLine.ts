@@ -9,6 +9,10 @@ export class NumberInputLine extends BaseLine {
   private readonly inputElement: HTMLInputElement
   private label: string = ''
   private value: number = 0
+  private min: number | null = null
+  private max: number | null = null
+  private step: number = 0
+
   private model: NumberInputLineModel | null = null
 
   constructor(protected readonly userPanel: BasePanel) {
@@ -62,19 +66,19 @@ export class NumberInputLine extends BaseLine {
     this.inputElement.addEventListener('blur', () => this.updateInputValue())
 
     plus.addEventListener('click', e => {
-      this.value += e.shiftKey ? 10 : 1
+      this.value += (e.shiftKey ? 10 : 1) * (this.step || 1)
       this.updateInputValue(true)
     })
 
     minus.addEventListener('click', e => {
-      this.value -= e.shiftKey ? 10 : 1
+      this.value -= (e.shiftKey ? 10 : 1) * (this.step || 1)
       this.updateInputValue(true)
     })
 
     stepper.addEventListener('wheel', e => {
       e.preventDefault()
       const delta = Math.sign(e.deltaY)
-      const step = e.shiftKey ? 10 : 1
+      const step = (e.shiftKey ? 10 : 1) * (this.step || 1)
       this.value += delta * step
       this.updateInputValue(true)
     })
@@ -82,7 +86,7 @@ export class NumberInputLine extends BaseLine {
 
   private updateInputValue(send: boolean = false) {
     if (send) this.model?.onInputChange({ value: this.value })
-    this.inputElement.value = String(this.value)
+    this.inputElement.value = String(Math.round(this.value * 1000) / 1000)
   }
 
   update(model: NumberInputLineModel): void {
@@ -98,6 +102,24 @@ export class NumberInputLine extends BaseLine {
     if (this.value !== newValue) {
       this.value = newValue
       this.inputElement.value = String(this.value)
+    }
+
+    if (this.min !== model.min) {
+      this.min = model.min ?? null
+      if (this.min !== null) this.inputElement.min = String(this.min)
+      else this.inputElement.removeAttribute('min')
+    }
+
+    if (this.max !== model.max) {
+      this.max = model.max ?? null
+      if (this.max !== null) this.inputElement.max = String(this.max)
+      else this.inputElement.removeAttribute('max')
+    }
+
+    if (this.step !== model.step) {
+      this.step = model.step ?? 0
+      if (this.step !== 0) this.inputElement.step = String(this.step)
+      else this.inputElement.removeAttribute('step')
     }
   }
 }

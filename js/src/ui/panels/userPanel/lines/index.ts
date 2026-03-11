@@ -22,6 +22,9 @@ export type NumberInputLineModel = {
   type: 'number-input',
   label: string,
   value: number,
+  min: number,
+  max: number,
+  step: number,
   onInputChange: (args: { value: number }) => void
 }
 

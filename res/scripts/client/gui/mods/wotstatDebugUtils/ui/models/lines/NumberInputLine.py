@@ -2,7 +2,7 @@ from Event import SafeEvent
 from .Line import Line
 
 class NumberInputLine(Line):
-  def __init__(self, properties=3, commands=1):
+  def __init__(self, properties=6, commands=1):
     # type: (str, int, int) -> None
     super(NumberInputLine, self).__init__(type='number-input', properties=properties, commands=commands)
     self.onChange = SafeEvent()
@@ -12,6 +12,9 @@ class NumberInputLine(Line):
     super(NumberInputLine, self)._initialize()
     self._addStringProperty('label', '')
     self._addRealProperty('value', 0)
+    self._addRealProperty('min', -float('inf'))
+    self._addRealProperty('max', float('inf'))
+    self._addRealProperty('step', 0)
     self._onInputChangeCommand = self._addCommand('onInputChange')
     
     self._onInputChangeCommand += self._onInputChange
@@ -45,3 +48,33 @@ class NumberInputLine(Line):
   def value(self, value):
     # type: (float) -> None
     self._setReal(2, value)
+
+  @property
+  def min(self):
+    # type: () -> float
+    return self._getReal(3)
+  
+  @min.setter
+  def min(self, value):
+    # type: (float) -> None
+    self._setReal(3, value)
+
+  @property
+  def max(self):
+    # type: () -> float
+    return self._getReal(4)
+  
+  @max.setter
+  def max(self, value):
+    # type: (float) -> None
+    self._setReal(4, value)
+
+  @property
+  def step(self):
+    # type: () -> float
+    return self._getReal(5)
+  
+  @step.setter
+  def step(self, value):
+    # type: (float) -> None
+    self._setReal(5, value)

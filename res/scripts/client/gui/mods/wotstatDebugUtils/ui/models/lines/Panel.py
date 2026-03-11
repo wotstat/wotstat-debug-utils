@@ -116,11 +116,14 @@ class Panel(ViewModel):
       line.onChange += onChangeCallback
     return line
   
-  def addNumberInputLine(self, label, value=0, onChangeCallback=None):
-    # type: (str, float, Callable) -> NumberInputLine
+  def addNumberInputLine(self, label, value=0, min=None, max=None, step=None, onChangeCallback=None):
+    # type: (str, float, float, float, float, Callable) -> NumberInputLine
     line = NumberInputLine()
     line.label = label
     line.value = value
+    if min is not None: line.min = min
+    if max is not None: line.max = max
+    if step is not None: line.step = step
     self._addLine(line)
     if onChangeCallback is not None:
       line.onChange += onChangeCallback
