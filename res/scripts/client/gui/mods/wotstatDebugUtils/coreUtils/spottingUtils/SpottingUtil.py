@@ -176,7 +176,7 @@ class SpottingUtil(object):
           ]], color=GREY_COLOR[0]))
 
           self.drawerable.append(drawer.createLine(points=[
-            matrix.applyPoint(Vector3(center.x, spotBbox[1].y, center.z)),
+            matrix.applyPoint(Vector3(hullCenter.x, spotBbox[1].y, hullCenter.z)),
             maskPoints[5],
             matrix.applyPoint(Vector3(0, 0, 0)),
           ], color=GREY_COLOR[0]))
